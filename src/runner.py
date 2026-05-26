@@ -1,4 +1,6 @@
 import json
+import csv
+import os
 from typing import Any, Dict, List
 from copy import deepcopy
 from src.combat_engine import CombatEngine, Combatant
@@ -172,3 +174,81 @@ def print_table(results: List[Dict[str, Any]], attacker_name: str, defender_name
     # Table footer
     print("└─" + "─" * 35 + "┴─" + "─" * 10 + "┴─" + "─" * 10 + "┴─" + "─" * 10 + "┴─" + "─" * 10 + "┘")
     print()
+
+
+def export_csv(results: List[Dict[str, Any]], output_path: str) -> None:
+    """
+    Export scenario results to CSV file with detailed damage variants.
+
+    Each scenario produces 6 rows (normal, normal_weakness, crit, crit_weakness,
+    expected, expected_weakness damage types).
+
+    Args:
+        results: List of scenario results from run_all_scenarios
+        output_path: Path to CSV output file
+
+    Raises:
+        IOError: If file cannot be written
+    """
+    # Create output directory if doesn't exist
+    output_dir = os.path.dirname(output_path)
+    if output_dir and not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    # Define CSV headers
+    headers = [
+        'scenario_name',
+        'attacker_buffs',
+        'defender_buffs',
+        'hit_type',
+        'weakness',
+        'crit',
+        'damage',
+        'crit_rate',
+        'percent_change',
+        'baseline_damage'
+    ]
+
+    # Write CSV
+    with open(output_path, 'w', newline='') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=headers)
+        writer.writeheader()
+
+        # Get baseline damage from first scenario
+        baseline_damage = results[0]['damages']['normal'] if results else 0
+
+        # Write one row per damage variant per scenario
+        for result in results:
+            scenario_name = result['scenario_name']
+            attacker_buffs = json.dumps(result['attacker_buffs'])
+            defender_buffs = json.dumps(result['defender_buffs'])
+            crit_rate = result['crit_rate']
+            percent_change = result['percent_change']
+
+            # Damage variants: normal, normal_weakness, crit, crit_weakness, expected, expected_weakness
+            variants = [
+                ('normal', False, False),
+                ('normal_weakness', True, False),
+                ('crit', False, True),
+                ('crit_weakness', True, True),
+                ('expected', False, False),
+                ('expected_weakness', True, False)
+            ]
+
+            for variant_key, is_weakness, is_crit in variants:
+                damage = result['damages'][variant_key]
+
+                writer.writerow({
+                    'scenario_name': scenario_name,
+                    'attacker_buffs': attacker_buffs,
+                    'defender_buffs': defender_buffs,
+                    'hit_type': variant_key,
+                    'weakness': is_weakness,
+                    'crit': is_crit,
+                    'damage': f"{damage:.1f}",
+                    'crit_rate': f"{crit_rate:.4f}",
+                    'percent_change': f"{percent_change:.1f}",
+                    'baseline_damage': f"{baseline_damage:.1f}"
+                })
+
+    print(f"CSV exported to: {output_path}")
