@@ -5,8 +5,8 @@ import sys
 import argparse
 from typing import Any, Dict, List
 from copy import deepcopy
-from src.combat_engine import CombatEngine, Combatant
-from src.visualizer import generate_all_graphs
+from combat_engine import CombatEngine, Combatant
+from visualizer import generate_all_graphs
 
 
 def load_config(config_path: str) -> Dict[str, Any]:
