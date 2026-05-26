@@ -34,10 +34,10 @@ pip install -r requirements.txt
 
 ```bash
 # Run simulator with default config
-python3 src/runner.py
+python3 -m src.runner
 
 # Run with custom config
-python3 src/runner.py path/to/custom_config.json
+python3 -m src.runner path/to/custom_config.json
 ```
 
 ### Output
