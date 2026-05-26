@@ -1,9 +1,12 @@
 import json
 import csv
 import os
+import sys
+import argparse
 from typing import Any, Dict, List
 from copy import deepcopy
 from src.combat_engine import CombatEngine, Combatant
+from src.visualizer import generate_all_graphs
 
 
 def load_config(config_path: str) -> Dict[str, Any]:
@@ -252,3 +255,80 @@ def export_csv(results: List[Dict[str, Any]], output_path: str) -> None:
                 })
 
     print(f"CSV exported to: {output_path}")
+
+
+def main() -> None:
+    """
+    Main entry point for SMTV Combat Simulator.
+
+    Parses CLI arguments, loads config, runs all scenarios, prints table,
+    exports CSV, generates all graphs, and prints completion summary.
+    """
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(
+        description='SMTV Combat Simulator - Calculate damage across multiple scenarios'
+    )
+    parser.add_argument(
+        'config',
+        nargs='?',
+        default='config.json',
+        help='Path to configuration file (default: config.json)'
+    )
+    args = parser.parse_args()
+
+    try:
+        # Load configuration
+        config = load_config(args.config)
+        print(f"Loaded config from: {args.config}")
+
+        # Run all scenarios
+        results = run_all_scenarios(config)
+
+        # Print results table
+        print_table(results, config['attacker']['name'], config['defender']['name'])
+
+        # Export CSV
+        csv_path = 'output/results.csv'
+        export_csv(results, csv_path)
+
+        # Generate all graphs
+        engine = CombatEngine(
+            weakness_mult=config['formulas']['weakness_multiplier'],
+            crit_mult=config['formulas']['crit_multiplier'],
+            skill_power=config['formulas']['skill_power']
+        )
+        attacker = Combatant(
+            name=config['attacker']['name'],
+            base_stats=config['attacker']['stats']
+        )
+        defender = Combatant(
+            name=config['defender']['name'],
+            base_stats=config['defender']['stats']
+        )
+
+        generate_all_graphs(results, engine, attacker, defender, 'output/')
+
+        # Print completion summary
+        print("\n" + "=" * 80)
+        print("SIMULATION COMPLETE")
+        print("=" * 80)
+        print(f"Results exported to: {csv_path}")
+        print(f"Graphs generated in: output/")
+        print(f"  - output/scenario_comparison.png")
+        print(f"  - output/buff_progression.png")
+        print(f"  - output/buff_debuff_matrix.png")
+        print("=" * 80)
+
+    except FileNotFoundError as e:
+        print(f"Error: Config file not found: {args.config}", file=sys.stderr)
+        sys.exit(1)
+    except json.JSONDecodeError as e:
+        print(f"Error: Invalid JSON in config file: {e}", file=sys.stderr)
+        sys.exit(1)
+    except Exception as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
+
+
+if __name__ == '__main__':
+    main()
