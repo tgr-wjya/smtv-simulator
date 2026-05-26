@@ -229,3 +229,42 @@ def test_calculate_damage_weakness_and_crit():
     # Base damage = 100, weakness * crit = 1.5 * 1.5 = 2.25
     # 100 * 2.25 = 225
     assert damage == 225.0
+
+
+# Tests for calculate_expected_damage
+def test_calculate_expected_damage_no_weakness():
+    """Test expected damage without weakness"""
+    engine = CombatEngine(weakness_mult=1.5, crit_mult=1.5, skill_power=100)
+
+    attacker_stats = {'STR': 50, 'VIT': 40, 'MAG': 40, 'AGI': 40, 'LUC': 40}
+    defender_stats = {'STR': 40, 'VIT': 50, 'MAG': 40, 'AGI': 40, 'LUC': 40}
+
+    attacker = Combatant(name="Attacker", base_stats=attacker_stats)
+    defender = Combatant(name="Defender", base_stats=defender_stats)
+
+    expected_damage = engine.calculate_expected_damage(attacker, defender, is_weakness=False)
+
+    # Base damage = 100, crit rate = 5%
+    # Normal damage = 100 * 1.0 = 100
+    # Crit damage = 100 * 1.5 = 150
+    # Expected = 100 * (1 - 0.05) + 150 * 0.05 = 100 * 0.95 + 150 * 0.05 = 95 + 7.5 = 102.5
+    assert expected_damage == 102.5
+
+
+def test_calculate_expected_damage_with_weakness():
+    """Test expected damage with weakness"""
+    engine = CombatEngine(weakness_mult=1.5, crit_mult=1.5, skill_power=100)
+
+    attacker_stats = {'STR': 50, 'VIT': 40, 'MAG': 40, 'AGI': 40, 'LUC': 40}
+    defender_stats = {'STR': 40, 'VIT': 50, 'MAG': 40, 'AGI': 40, 'LUC': 40}
+
+    attacker = Combatant(name="Attacker", base_stats=attacker_stats)
+    defender = Combatant(name="Defender", base_stats=defender_stats)
+
+    expected_damage = engine.calculate_expected_damage(attacker, defender, is_weakness=True)
+
+    # Base damage = 100, crit rate = 5%
+    # Normal damage (weakness only) = 100 * 1.5 = 150
+    # Crit damage (weakness + crit) = 100 * 1.5 * 1.5 = 225
+    # Expected = 150 * (1 - 0.05) + 225 * 0.05 = 150 * 0.95 + 225 * 0.05 = 142.5 + 11.25 = 153.75
+    assert expected_damage == 153.75

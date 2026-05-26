@@ -143,3 +143,30 @@ class CombatEngine:
 
         damage = base_damage * weakness_mult * crit_mult
         return damage
+
+    def calculate_expected_damage(
+        self,
+        attacker: Combatant,
+        defender: Combatant,
+        is_weakness: bool
+    ) -> float:
+        """
+        Calculate expected damage weighted by crit rate.
+
+        Formula: normal_dmg × (1 - crit_rate) + crit_dmg × crit_rate
+
+        Args:
+            attacker: Attacking combatant
+            defender: Defending combatant
+            is_weakness: Whether hit exploits weakness
+
+        Returns:
+            Expected damage value
+        """
+        crit_rate = self.calculate_crit_rate(attacker, defender)
+
+        normal_damage = self.calculate_damage(attacker, defender, is_weakness=is_weakness, is_crit=False)
+        crit_damage = self.calculate_damage(attacker, defender, is_weakness=is_weakness, is_crit=True)
+
+        expected_damage = normal_damage * (1 - crit_rate) + crit_damage * crit_rate
+        return expected_damage
