@@ -37,3 +37,33 @@ def test_get_effective_stat_with_buffs():
     # -2 debuff = 0.7x multiplier
     combatant.buff_levels['VIT'] = -2
     assert combatant.get_effective_stat('VIT') == 70.0
+
+
+def test_apply_buff_increases_level():
+    """Test apply_buff increases buff level"""
+    stats = {'STR': 50, 'VIT': 50, 'MAG': 50, 'AGI': 50, 'LUC': 50}
+    combatant = Combatant(name="Test", base_stats=stats)
+
+    combatant.apply_buff('STR', 2)
+    assert combatant.buff_levels['STR'] == 2
+
+    combatant.apply_buff('STR', 1)
+    assert combatant.buff_levels['STR'] == 3
+
+
+def test_apply_buff_caps_at_positive_3():
+    """Test buff level cannot exceed +3"""
+    stats = {'STR': 50, 'VIT': 50, 'MAG': 50, 'AGI': 50, 'LUC': 50}
+    combatant = Combatant(name="Test", base_stats=stats)
+
+    combatant.apply_buff('STR', 5)
+    assert combatant.buff_levels['STR'] == 3
+
+
+def test_apply_buff_caps_at_negative_3():
+    """Test buff level cannot go below -3"""
+    stats = {'STR': 50, 'VIT': 50, 'MAG': 50, 'AGI': 50, 'LUC': 50}
+    combatant = Combatant(name="Test", base_stats=stats)
+
+    combatant.apply_buff('VIT', -5)
+    assert combatant.buff_levels['VIT'] == -3

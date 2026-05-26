@@ -29,3 +29,14 @@ class Combatant:
         buff_level = self.buff_levels[stat]
         multiplier = BUFF_MULTIPLIERS[buff_level]
         return base_value * multiplier
+
+    def apply_buff(self, stat: str, delta: int) -> None:
+        """
+        Apply buff/debuff to a stat. Clamped to [-3, +3].
+
+        Args:
+            stat: Stat name ('STR', 'VIT', etc.)
+            delta: Change amount (positive = buff, negative = debuff)
+        """
+        new_level = self.buff_levels[stat] + delta
+        self.buff_levels[stat] = max(-3, min(3, new_level))
