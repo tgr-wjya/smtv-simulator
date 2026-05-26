@@ -50,3 +50,17 @@ class Combatant:
         """
         for stat in self.buff_levels.keys():
             self.apply_buff(stat, delta)
+
+
+class CombatEngine:
+    """Handles damage calculation with SMTV formulas"""
+
+    def __init__(
+        self,
+        weakness_mult: float = 1.5,
+        crit_mult: float = 1.5,
+        skill_power: int = 100
+    ):
+        self.weakness_multiplier = weakness_mult
+        self.crit_multiplier = crit_mult
+        self.skill_power = skill_power
