@@ -348,19 +348,20 @@ def test_print_table_outputs_box_drawing_chars(capsys):
     output = captured.out
 
     # Check for box-drawing characters
-    assert "╔" in output
-    assert "╗" in output
-    assert "╚" in output
-    assert "╝" in output
-    assert "╠" in output
-    assert "╣" in output
-    assert "═" in output
+    assert "┌" in output
+    assert "┐" in output
+    assert "└" in output
+    assert "┘" in output
+    assert "├" in output
+    assert "┤" in output
+    assert "─" in output
     assert "│" in output
 
     # Check for header elements
-    assert "Attacker vs Defender" in output
-    assert "Baseline Damage:" in output
-    assert "Crit Rate:" in output
+    assert "Attacker:" in output
+    assert "Defender:" in output
+    assert "Baseline damage:" in output
+    assert "Crit rate:" in output
 
     # Check for table columns
     assert "Scenario" in output
@@ -381,4 +382,4 @@ def test_print_table_empty_results(capsys):
     captured = capsys.readouterr()
     output = captured.out
 
-    assert "No results to display." in output
+    assert "No results to display" in output
