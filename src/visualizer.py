@@ -144,3 +144,102 @@ def generate_progressive_buff_chart(
     plt.close()
 
     print(f"Progressive buff chart saved to: {output_path}")
+
+
+def generate_buff_debuff_matrix(
+    engine,
+    attacker,
+    defender,
+    output_path: str
+) -> None:
+    """
+    Generate heatmap matrix of attacker buff vs defender debuff.
+
+    Args:
+        engine: CombatEngine instance
+        attacker: Attacker combatant (at base buffs)
+        defender: Defender combatant (at base buffs)
+        output_path: Path to save PNG file
+    """
+    from copy import deepcopy
+
+    # Save original buff levels
+    original_attacker_buffs = deepcopy(attacker.buff_levels)
+    original_defender_buffs = deepcopy(defender.buff_levels)
+
+    buff_levels = list(range(-3, 4))
+    damage_matrix = []
+
+    for defender_debuff in reversed(buff_levels):  # Reverse for visual clarity
+        row = []
+        for attacker_buff in buff_levels:
+            # Set buffs
+            attacker.buff_levels['STR'] = attacker_buff
+            defender.buff_levels['VIT'] = defender_debuff
+
+            # Calculate expected damage
+            damage = engine.calculate_expected_damage(attacker, defender, is_weakness=False)
+            row.append(damage)
+
+        damage_matrix.append(row)
+
+    # Reset buffs
+    attacker.buff_levels = original_attacker_buffs
+    defender.buff_levels = original_defender_buffs
+
+    fig, ax = plt.subplots(figsize=(10, 8))
+
+    im = ax.imshow(damage_matrix, cmap='YlOrRd', aspect='auto')
+
+    # Set ticks
+    ax.set_xticks(np.arange(len(buff_levels)))
+    ax.set_yticks(np.arange(len(buff_levels)))
+    ax.set_xticklabels([f"{b:+d}" for b in buff_levels])
+    ax.set_yticklabels([f"{b:+d}" for b in reversed(buff_levels)])
+
+    # Labels
+    ax.set_xlabel('Attacker STR Buff Level', fontsize=12)
+    ax.set_ylabel('Defender VIT Buff Level', fontsize=12)
+    ax.set_title('Expected Damage Matrix (Buff × Debuff)', fontsize=14, fontweight='bold')
+
+    # Add damage values as text annotations
+    for i in range(len(buff_levels)):
+        for j in range(len(buff_levels)):
+            text = ax.text(j, i, f"{damage_matrix[i][j]:.0f}",
+                          ha="center", va="center", color="black", fontsize=9)
+
+    # Color bar
+    cbar = fig.colorbar(im, ax=ax)
+    cbar.set_label('Damage', fontsize=12)
+
+    plt.tight_layout()
+
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    plt.savefig(output_path, dpi=150)
+    plt.close()
+
+    print(f"Buff/debuff matrix heatmap saved to: {output_path}")
+
+
+def generate_all_graphs(
+    results: List[Dict[str, Any]],
+    engine,
+    attacker,
+    defender,
+    output_dir: str = 'output/'
+) -> None:
+    """
+    Generate all graph types and save to output directory.
+
+    Args:
+        results: List of scenario results
+        engine: CombatEngine instance
+        attacker: Attacker combatant
+        defender: Defender combatant
+        output_dir: Directory to save graphs
+    """
+    generate_scenario_comparison(results, os.path.join(output_dir, 'scenario_comparison.png'))
+    generate_progressive_buff_chart(engine, attacker, defender, os.path.join(output_dir, 'buff_progression.png'))
+    generate_buff_debuff_matrix(engine, attacker, defender, os.path.join(output_dir, 'buff_debuff_matrix.png'))
+
+    print(f"\nAll graphs generated in {output_dir}")
