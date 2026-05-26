@@ -160,3 +160,72 @@ def test_calculate_crit_rate_minimum_at_zero_percent():
 
     # Would be 5% + (-99 * 0.2%) = -14.8%, capped at 0%
     assert crit_rate == 0.0
+
+
+# Tests for calculate_damage
+def test_calculate_damage_normal():
+    """Test normal damage (no weakness, no crit)"""
+    engine = CombatEngine(weakness_mult=1.5, crit_mult=1.5, skill_power=100)
+
+    attacker_stats = {'STR': 50, 'VIT': 40, 'MAG': 40, 'AGI': 40, 'LUC': 40}
+    defender_stats = {'STR': 40, 'VIT': 50, 'MAG': 40, 'AGI': 40, 'LUC': 40}
+
+    attacker = Combatant(name="Attacker", base_stats=attacker_stats)
+    defender = Combatant(name="Defender", base_stats=defender_stats)
+
+    damage = engine.calculate_damage(attacker, defender, is_weakness=False, is_crit=False)
+
+    # Base damage = (50 * 100) / 50 = 100
+    # Normal (no multipliers) = 100
+    assert damage == 100.0
+
+
+def test_calculate_damage_weakness_only():
+    """Test damage with weakness but no crit"""
+    engine = CombatEngine(weakness_mult=1.5, crit_mult=1.5, skill_power=100)
+
+    attacker_stats = {'STR': 50, 'VIT': 40, 'MAG': 40, 'AGI': 40, 'LUC': 40}
+    defender_stats = {'STR': 40, 'VIT': 50, 'MAG': 40, 'AGI': 40, 'LUC': 40}
+
+    attacker = Combatant(name="Attacker", base_stats=attacker_stats)
+    defender = Combatant(name="Defender", base_stats=defender_stats)
+
+    damage = engine.calculate_damage(attacker, defender, is_weakness=True, is_crit=False)
+
+    # Base damage = 100, weakness mult = 1.5
+    # 100 * 1.5 = 150
+    assert damage == 150.0
+
+
+def test_calculate_damage_crit_only():
+    """Test damage with crit but no weakness"""
+    engine = CombatEngine(weakness_mult=1.5, crit_mult=1.5, skill_power=100)
+
+    attacker_stats = {'STR': 50, 'VIT': 40, 'MAG': 40, 'AGI': 40, 'LUC': 40}
+    defender_stats = {'STR': 40, 'VIT': 50, 'MAG': 40, 'AGI': 40, 'LUC': 40}
+
+    attacker = Combatant(name="Attacker", base_stats=attacker_stats)
+    defender = Combatant(name="Defender", base_stats=defender_stats)
+
+    damage = engine.calculate_damage(attacker, defender, is_weakness=False, is_crit=True)
+
+    # Base damage = 100, crit mult = 1.5
+    # 100 * 1.5 = 150
+    assert damage == 150.0
+
+
+def test_calculate_damage_weakness_and_crit():
+    """Test damage with both weakness and crit"""
+    engine = CombatEngine(weakness_mult=1.5, crit_mult=1.5, skill_power=100)
+
+    attacker_stats = {'STR': 50, 'VIT': 40, 'MAG': 40, 'AGI': 40, 'LUC': 40}
+    defender_stats = {'STR': 40, 'VIT': 50, 'MAG': 40, 'AGI': 40, 'LUC': 40}
+
+    attacker = Combatant(name="Attacker", base_stats=attacker_stats)
+    defender = Combatant(name="Defender", base_stats=defender_stats)
+
+    damage = engine.calculate_damage(attacker, defender, is_weakness=True, is_crit=True)
+
+    # Base damage = 100, weakness * crit = 1.5 * 1.5 = 2.25
+    # 100 * 2.25 = 225
+    assert damage == 225.0

@@ -114,3 +114,32 @@ class CombatEngine:
         # Cap at [0%, 100%]
         crit_rate = max(0.0, min(1.0, crit_rate))
         return crit_rate
+
+    def calculate_damage(
+        self,
+        attacker: Combatant,
+        defender: Combatant,
+        is_weakness: bool,
+        is_crit: bool
+    ) -> float:
+        """
+        Calculate damage with weakness and crit multipliers.
+
+        Formula: base_damage × weakness_mult × crit_mult
+
+        Args:
+            attacker: Attacking combatant
+            defender: Defending combatant
+            is_weakness: Whether hit exploits weakness
+            is_crit: Whether hit is critical
+
+        Returns:
+            Calculated damage
+        """
+        base_damage = self.calculate_base_damage(attacker, defender)
+
+        weakness_mult = self.weakness_multiplier if is_weakness else 1.0
+        crit_mult = self.crit_multiplier if is_crit else 1.0
+
+        damage = base_damage * weakness_mult * crit_mult
+        return damage
