@@ -2,7 +2,9 @@ import json
 import pytest
 import tempfile
 import os
-from src.runner import load_config, run_scenario, run_all_scenarios
+from io import StringIO
+import sys
+from src.runner import load_config, run_scenario, run_all_scenarios, print_table
 from src.combat_engine import CombatEngine, Combatant
 
 
@@ -315,3 +317,68 @@ def test_run_all_scenarios_calculates_percent_change():
     expected_percent_change = ((buffed_damage - baseline_damage) / baseline_damage) * 100
 
     assert abs(results[1]['percent_change'] - expected_percent_change) < 0.01
+
+
+def test_print_table_outputs_box_drawing_chars(capsys):
+    """Test print_table outputs correctly formatted ASCII table with box chars"""
+    config = {
+        "attacker": {
+            "name": "Attacker",
+            "stats": {"STR": 50, "VIT": 50, "MAG": 50, "AGI": 50, "LUC": 50}
+        },
+        "defender": {
+            "name": "Defender",
+            "stats": {"STR": 50, "VIT": 50, "MAG": 50, "AGI": 50, "LUC": 50}
+        },
+        "scenarios": [
+            {"name": "Baseline", "attacker_buffs": {}, "defender_buffs": {}},
+            {"name": "+2 STR", "attacker_buffs": {"STR": 2}, "defender_buffs": {}}
+        ],
+        "formulas": {
+            "weakness_multiplier": 1.5,
+            "crit_multiplier": 1.5,
+            "skill_power": 100
+        }
+    }
+
+    results = run_all_scenarios(config)
+    print_table(results, "Attacker", "Defender")
+
+    captured = capsys.readouterr()
+    output = captured.out
+
+    # Check for box-drawing characters
+    assert "╔" in output
+    assert "╗" in output
+    assert "╚" in output
+    assert "╝" in output
+    assert "╠" in output
+    assert "╣" in output
+    assert "═" in output
+    assert "│" in output
+
+    # Check for header elements
+    assert "Attacker vs Defender" in output
+    assert "Baseline Damage:" in output
+    assert "Crit Rate:" in output
+
+    # Check for table columns
+    assert "Scenario" in output
+    assert "Normal" in output
+    assert "% Change" in output
+    assert "Weakness" in output
+    assert "Expected" in output
+
+    # Check for scenario names
+    assert "Baseline" in output
+    assert "+2 STR" in output
+
+
+def test_print_table_empty_results(capsys):
+    """Test print_table handles empty results gracefully"""
+    print_table([], "Attacker", "Defender")
+
+    captured = capsys.readouterr()
+    output = captured.out
+
+    assert "No results to display." in output

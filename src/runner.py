@@ -123,3 +123,52 @@ def run_all_scenarios(config: Dict[str, Any]) -> List[Dict[str, Any]]:
             result['percent_change'] = percent_change
 
     return results
+
+
+def print_table(results: List[Dict[str, Any]], attacker_name: str, defender_name: str) -> None:
+    """
+    Print formatted ASCII table of scenario results with box-drawing characters.
+
+    Args:
+        results: List of scenario results from run_all_scenarios
+        attacker_name: Name of attacker combatant
+        defender_name: Name of defender combatant
+    """
+    if not results:
+        print("No results to display.")
+        return
+
+    # Extract baseline info
+    baseline_damage = results[0]['damages']['normal']
+    baseline_crit_rate = results[0]['crit_rate']
+
+    # Print header
+    print()
+    print("╔" + "═" * 78 + "╗")
+    print(f"║ {attacker_name} vs {defender_name:<57} ║")
+    print("╠" + "═" * 78 + "╣")
+    print(f"║ Baseline Damage: {baseline_damage:>8.2f}  |  Crit Rate: {baseline_crit_rate:>6.2%}{' ' * 33} ║")
+    print("╠" + "═" * 78 + "╣")
+
+    # Table header
+    print("║ Scenario" + " " * 20 + "│ Normal   │ % Change │ Weakness │ Expected │")
+    print("╠" + "═" * 78 + "╣")
+
+    # Table rows
+    for result in results:
+        scenario_name = result['scenario_name']
+        normal_dmg = result['damages']['normal']
+        percent_change = result['percent_change']
+        weakness_dmg = result['damages']['normal_weakness']
+        expected_dmg = result['damages']['expected']
+
+        # Format scenario name (truncate if needed)
+        scenario_col = scenario_name[:27].ljust(27)
+
+        # Build row
+        row = f"║ {scenario_col} │ {normal_dmg:>7.1f} │ {percent_change:>7.1f}% │ {weakness_dmg:>7.1f} │ {expected_dmg:>7.1f} │"
+        print(row)
+
+    # Footer
+    print("╚" + "═" * 78 + "╝")
+    print()
