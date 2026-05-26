@@ -127,48 +127,48 @@ def run_all_scenarios(config: Dict[str, Any]) -> List[Dict[str, Any]]:
 
 def print_table(results: List[Dict[str, Any]], attacker_name: str, defender_name: str) -> None:
     """
-    Print formatted ASCII table of scenario results with box-drawing characters.
+    Print formatted ASCII table of scenario results.
 
     Args:
         results: List of scenario results from run_all_scenarios
-        attacker_name: Name of attacker combatant
-        defender_name: Name of defender combatant
+        attacker_name: Attacker name for header
+        defender_name: Defender name for header
     """
     if not results:
-        print("No results to display.")
+        print("No results to display")
         return
 
-    # Extract baseline info
-    baseline_damage = results[0]['damages']['normal']
-    baseline_crit_rate = results[0]['crit_rate']
-
-    # Print header
+    print("\n" + "=" * 80)
+    print("SMTV Combat Simulator")
+    print("=" * 80)
+    print(f"Attacker: {attacker_name}")
+    print(f"Defender: {defender_name}")
     print()
-    print("╔" + "═" * 78 + "╗")
-    print(f"║ {attacker_name} vs {defender_name:<57} ║")
-    print("╠" + "═" * 78 + "╣")
-    print(f"║ Baseline Damage: {baseline_damage:>8.2f}  |  Crit Rate: {baseline_crit_rate:>6.2%}{' ' * 33} ║")
-    print("╠" + "═" * 78 + "╣")
+
+    baseline_damage = results[0]['damages']['normal']
+    crit_rate_pct = results[0]['crit_rate'] * 100
+
+    print(f"Baseline damage: {baseline_damage:.1f} (normal hit, no weakness)")
+    print(f"Crit rate: {crit_rate_pct:.1f}%")
+    print()
 
     # Table header
-    print("║ Scenario" + " " * 20 + "│ Normal   │ % Change │ Weakness │ Expected │")
-    print("╠" + "═" * 78 + "╣")
+    print("┌─" + "─" * 35 + "┬─" + "─" * 10 + "┬─" + "─" * 10 + "┬─" + "─" * 10 + "┬─" + "─" * 10 + "┐")
+    print(f"│ {'Scenario':<35}│ {'Normal':<10}│ {'% Change':<10}│ {'Weakness':<10}│ {'Expected':<10}│")
+    print("├─" + "─" * 35 + "┼─" + "─" * 10 + "┼─" + "─" * 10 + "┼─" + "─" * 10 + "┼─" + "─" * 10 + "┤")
 
     # Table rows
     for result in results:
-        scenario_name = result['scenario_name']
+        scenario_name = result['scenario_name'][:35]
         normal_dmg = result['damages']['normal']
         percent_change = result['percent_change']
         weakness_dmg = result['damages']['normal_weakness']
         expected_dmg = result['damages']['expected']
 
-        # Format scenario name (truncate if needed)
-        scenario_col = scenario_name[:27].ljust(27)
+        percent_str = f"+{percent_change:.1f}%" if percent_change >= 0 else f"{percent_change:.1f}%"
 
-        # Build row
-        row = f"║ {scenario_col} │ {normal_dmg:>7.1f} │ {percent_change:>7.1f}% │ {weakness_dmg:>7.1f} │ {expected_dmg:>7.1f} │"
-        print(row)
+        print(f"│ {scenario_name:<35}│ {normal_dmg:>9.1f} │ {percent_str:>9} │ {weakness_dmg:>9.1f} │ {expected_dmg:>9.1f} │")
 
-    # Footer
-    print("╚" + "═" * 78 + "╝")
+    # Table footer
+    print("└─" + "─" * 35 + "┴─" + "─" * 10 + "┴─" + "─" * 10 + "┴─" + "─" * 10 + "┴─" + "─" * 10 + "┘")
     print()
