@@ -40,3 +40,13 @@ class Combatant:
         """
         new_level = self.buff_levels[stat] + delta
         self.buff_levels[stat] = max(-3, min(3, new_level))
+
+    def apply_all_buffs(self, delta: int) -> None:
+        """
+        Apply same buff/debuff to all stats.
+
+        Args:
+            delta: Change amount (positive = buff, negative = debuff)
+        """
+        for stat in self.buff_levels.keys():
+            self.apply_buff(stat, delta)
