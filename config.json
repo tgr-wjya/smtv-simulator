@@ -1,0 +1,64 @@
+{
+  "attacker": {
+    "name": "Nahobino",
+    "stats": {
+      "STR": 45,
+      "VIT": 38,
+      "MAG": 42,
+      "AGI": 40,
+      "LUC": 35
+    }
+  },
+  "defender": {
+    "name": "Daemon",
+    "stats": {
+      "STR": 50,
+      "VIT": 55,
+      "MAG": 40,
+      "AGI": 35,
+      "LUC": 30
+    }
+  },
+  "scenarios": [
+    {
+      "name": "No buffs (baseline)",
+      "attacker_buffs": {},
+      "defender_buffs": {}
+    },
+    {
+      "name": "Attacker +3 STR",
+      "attacker_buffs": {"STR": 3},
+      "defender_buffs": {}
+    },
+    {
+      "name": "Attacker +1 all stats",
+      "attacker_buffs": {"STR": 1, "VIT": 1, "MAG": 1, "AGI": 1, "LUC": 1},
+      "defender_buffs": {}
+    },
+    {
+      "name": "Defender -3 VIT",
+      "attacker_buffs": {},
+      "defender_buffs": {"VIT": -3}
+    },
+    {
+      "name": "Defender -1 all stats",
+      "attacker_buffs": {},
+      "defender_buffs": {"STR": -1, "VIT": -1, "MAG": -1, "AGI": -1, "LUC": -1}
+    },
+    {
+      "name": "Both maxed (+3 STR, -3 VIT)",
+      "attacker_buffs": {"STR": 3},
+      "defender_buffs": {"VIT": -3}
+    },
+    {
+      "name": "Full buff/debuff stack",
+      "attacker_buffs": {"STR": 3, "VIT": 3, "MAG": 3, "AGI": 3, "LUC": 3},
+      "defender_buffs": {"STR": -3, "VIT": -3, "MAG": -3, "AGI": -3, "LUC": -3}
+    }
+  ],
+  "formulas": {
+    "weakness_multiplier": 1.5,
+    "crit_multiplier": 1.5,
+    "skill_power": 100
+  }
+}
