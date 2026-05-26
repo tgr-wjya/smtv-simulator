@@ -64,3 +64,26 @@ class CombatEngine:
         self.weakness_multiplier = weakness_mult
         self.crit_multiplier = crit_mult
         self.skill_power = skill_power
+
+    def calculate_base_damage(
+        self,
+        attacker: Combatant,
+        defender: Combatant
+    ) -> float:
+        """
+        Calculate base physical damage.
+
+        Formula: (effective_STR * skill_power) / effective_VIT
+
+        Args:
+            attacker: Attacking combatant
+            defender: Defending combatant
+
+        Returns:
+            Base damage (before weakness/crit)
+        """
+        effective_str = attacker.get_effective_stat('STR')
+        effective_vit = defender.get_effective_stat('VIT')
+
+        damage = (effective_str * self.skill_power) / effective_vit
+        return damage
