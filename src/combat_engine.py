@@ -87,3 +87,30 @@ class CombatEngine:
 
         damage = (effective_str * self.skill_power) / effective_vit
         return damage
+
+    def calculate_crit_rate(
+        self,
+        attacker: Combatant,
+        defender: Combatant
+    ) -> float:
+        """
+        Calculate critical hit rate.
+
+        Formula: 5% base + (effective_LUC_diff × 0.2%), capped [0%, 100%]
+
+        Args:
+            attacker: Attacking combatant
+            defender: Defending combatant
+
+        Returns:
+            Critical hit rate as decimal (0.0 to 1.0)
+        """
+        effective_attacker_luc = attacker.get_effective_stat('LUC')
+        effective_defender_luc = defender.get_effective_stat('LUC')
+
+        luc_diff = effective_attacker_luc - effective_defender_luc
+        crit_rate = 0.05 + (luc_diff * 0.002)
+
+        # Cap at [0%, 100%]
+        crit_rate = max(0.0, min(1.0, crit_rate))
+        return crit_rate

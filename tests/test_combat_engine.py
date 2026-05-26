@@ -58,3 +58,105 @@ def test_calculate_base_damage_with_buffs():
 
     # (50 * 1.6 * 100) / (50 * 0.7) = 8000 / 35 = 228.57...
     assert abs(damage - 228.57) < 0.01
+
+
+def test_calculate_crit_rate_equal_luck():
+    """Test crit rate with equal LUC: 5% base"""
+    engine = CombatEngine()
+
+    attacker_stats = {'STR': 50, 'VIT': 40, 'MAG': 40, 'AGI': 40, 'LUC': 40}
+    defender_stats = {'STR': 40, 'VIT': 50, 'MAG': 40, 'AGI': 40, 'LUC': 40}
+
+    attacker = Combatant(name="Attacker", base_stats=attacker_stats)
+    defender = Combatant(name="Defender", base_stats=defender_stats)
+
+    crit_rate = engine.calculate_crit_rate(attacker, defender)
+
+    # Equal LUC (0 diff) = 5% base
+    assert crit_rate == 0.05
+
+
+def test_calculate_crit_rate_higher_attacker_luck():
+    """Test crit rate with higher attacker LUC: +20 diff = 9%"""
+    engine = CombatEngine()
+
+    attacker_stats = {'STR': 50, 'VIT': 40, 'MAG': 40, 'AGI': 40, 'LUC': 60}
+    defender_stats = {'STR': 40, 'VIT': 50, 'MAG': 40, 'AGI': 40, 'LUC': 40}
+
+    attacker = Combatant(name="Attacker", base_stats=attacker_stats)
+    defender = Combatant(name="Defender", base_stats=defender_stats)
+
+    crit_rate = engine.calculate_crit_rate(attacker, defender)
+
+    # LUC diff = 60 - 40 = 20, crit rate = 5% + (20 * 0.2%) = 9%
+    assert crit_rate == 0.09
+
+
+def test_calculate_crit_rate_lower_attacker_luck():
+    """Test crit rate with lower attacker LUC: -20 diff = 1%"""
+    engine = CombatEngine()
+
+    attacker_stats = {'STR': 50, 'VIT': 40, 'MAG': 40, 'AGI': 40, 'LUC': 20}
+    defender_stats = {'STR': 40, 'VIT': 50, 'MAG': 40, 'AGI': 40, 'LUC': 40}
+
+    attacker = Combatant(name="Attacker", base_stats=attacker_stats)
+    defender = Combatant(name="Defender", base_stats=defender_stats)
+
+    crit_rate = engine.calculate_crit_rate(attacker, defender)
+
+    # LUC diff = 20 - 40 = -20, crit rate = 5% + (-20 * 0.2%) = 1%
+    assert abs(crit_rate - 0.01) < 0.0001
+
+
+def test_calculate_crit_rate_with_luck_buffs():
+    """Test crit rate respects effective LUC (with buffs)"""
+    engine = CombatEngine()
+
+    attacker_stats = {'STR': 50, 'VIT': 40, 'MAG': 40, 'AGI': 40, 'LUC': 50}
+    defender_stats = {'STR': 40, 'VIT': 50, 'MAG': 40, 'AGI': 40, 'LUC': 50}
+
+    attacker = Combatant(name="Attacker", base_stats=attacker_stats)
+    defender = Combatant(name="Defender", base_stats=defender_stats)
+
+    # Attacker +1 LUC (1.2x), Defender -1 LUC (0.85x)
+    attacker.buff_levels['LUC'] = 1
+    defender.buff_levels['LUC'] = -1
+
+    crit_rate = engine.calculate_crit_rate(attacker, defender)
+
+    # Effective LUC: attacker = 50 * 1.2 = 60, defender = 50 * 0.85 = 42.5
+    # Diff = 60 - 42.5 = 17.5, crit rate = 5% + (17.5 * 0.2%) = 8.5%
+    assert abs(crit_rate - 0.085) < 0.0001
+
+
+def test_calculate_crit_rate_capped_at_100_percent():
+    """Test crit rate capped at 100% with extreme LUC diff"""
+    engine = CombatEngine()
+
+    attacker_stats = {'STR': 50, 'VIT': 40, 'MAG': 40, 'AGI': 40, 'LUC': 100}
+    defender_stats = {'STR': 40, 'VIT': 50, 'MAG': 40, 'AGI': 40, 'LUC': 1}
+
+    attacker = Combatant(name="Attacker", base_stats=attacker_stats)
+    defender = Combatant(name="Defender", base_stats=defender_stats)
+
+    crit_rate = engine.calculate_crit_rate(attacker, defender)
+
+    # Would be 5% + (99 * 0.2%) = 24.8%, but ensure cap works if exceeded
+    assert crit_rate <= 1.0
+    assert crit_rate >= 0.0
+
+
+def test_calculate_crit_rate_minimum_at_zero_percent():
+    """Test crit rate capped at 0% with extreme negative LUC diff"""
+    engine = CombatEngine()
+
+    attacker_stats = {'STR': 50, 'VIT': 40, 'MAG': 40, 'AGI': 40, 'LUC': 1}
+    defender_stats = {'STR': 40, 'VIT': 50, 'MAG': 40, 'AGI': 40, 'LUC': 100}
+
+    attacker = Combatant(name="Attacker", base_stats=attacker_stats)
+    defender = Combatant(name="Defender", base_stats=defender_stats)
+
+    crit_rate = engine.calculate_crit_rate(attacker, defender)
+
+    # Would be 5% + (-99 * 0.2%) = -14.8%, capped at 0%
+    assert crit_rate == 0.0
