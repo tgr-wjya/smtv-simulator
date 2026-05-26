@@ -1,5 +1,5 @@
 import json
-from typing import Any, Dict
+from typing import Any, Dict, List
 from copy import deepcopy
 from src.combat_engine import CombatEngine, Combatant
 
@@ -78,3 +78,48 @@ def run_scenario(
         'damages': damages,
         'crit_rate': crit_rate
     }
+
+
+def run_all_scenarios(config: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """
+    Run all scenarios from config and calculate percent changes.
+
+    Args:
+        config: Full configuration dictionary
+
+    Returns:
+        List of scenario results with percent_change added
+    """
+    # Initialize engine from config
+    engine = CombatEngine(
+        weakness_mult=config['formulas']['weakness_multiplier'],
+        crit_mult=config['formulas']['crit_multiplier'],
+        skill_power=config['formulas']['skill_power']
+    )
+
+    # Create combatants
+    attacker = Combatant(
+        name=config['attacker']['name'],
+        base_stats=config['attacker']['stats']
+    )
+    defender = Combatant(
+        name=config['defender']['name'],
+        base_stats=config['defender']['stats']
+    )
+
+    # Run all scenarios
+    results = []
+    for scenario in config['scenarios']:
+        result = run_scenario(engine, attacker, defender, scenario)
+        results.append(result)
+
+    # Calculate percent changes relative to first scenario (baseline)
+    if results:
+        baseline_damage = results[0]['damages']['normal']
+
+        for result in results:
+            current_damage = result['damages']['normal']
+            percent_change = ((current_damage - baseline_damage) / baseline_damage) * 100
+            result['percent_change'] = percent_change
+
+    return results

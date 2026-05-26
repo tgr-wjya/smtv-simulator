@@ -2,7 +2,7 @@ import json
 import pytest
 import tempfile
 import os
-from src.runner import load_config, run_scenario
+from src.runner import load_config, run_scenario, run_all_scenarios
 from src.combat_engine import CombatEngine, Combatant
 
 
@@ -248,3 +248,70 @@ def test_run_scenario_with_buffs():
     # Buffs should be reset after scenario
     assert attacker.buff_levels['STR'] == 0
     assert defender.buff_levels['VIT'] == 0
+
+
+def test_run_all_scenarios():
+    """Test run_all_scenarios processes all scenarios from config"""
+    config = {
+        "attacker": {
+            "name": "Attacker",
+            "stats": {"STR": 50, "VIT": 50, "MAG": 50, "AGI": 50, "LUC": 50}
+        },
+        "defender": {
+            "name": "Defender",
+            "stats": {"STR": 50, "VIT": 50, "MAG": 50, "AGI": 50, "LUC": 50}
+        },
+        "scenarios": [
+            {"name": "Scenario 1", "attacker_buffs": {}, "defender_buffs": {}},
+            {"name": "Scenario 2", "attacker_buffs": {"STR": 2}, "defender_buffs": {}}
+        ],
+        "formulas": {
+            "weakness_multiplier": 1.5,
+            "crit_multiplier": 1.5,
+            "skill_power": 100
+        }
+    }
+
+    results = run_all_scenarios(config)
+
+    assert len(results) == 2
+    assert results[0]['scenario_name'] == "Scenario 1"
+    assert results[1]['scenario_name'] == "Scenario 2"
+
+    # First scenario (baseline) should have percent_change = 0
+    assert results[0]['percent_change'] == 0.0
+
+    # Second scenario should show % increase
+    assert results[1]['percent_change'] > 0
+
+
+def test_run_all_scenarios_calculates_percent_change():
+    """Test percent_change is calculated relative to baseline"""
+    config = {
+        "attacker": {
+            "name": "Attacker",
+            "stats": {"STR": 50, "VIT": 50, "MAG": 50, "AGI": 50, "LUC": 50}
+        },
+        "defender": {
+            "name": "Defender",
+            "stats": {"STR": 50, "VIT": 50, "MAG": 50, "AGI": 50, "LUC": 50}
+        },
+        "scenarios": [
+            {"name": "Baseline", "attacker_buffs": {}, "defender_buffs": {}},
+            {"name": "+3 STR", "attacker_buffs": {"STR": 3}, "defender_buffs": {}}
+        ],
+        "formulas": {
+            "weakness_multiplier": 1.5,
+            "crit_multiplier": 1.5,
+            "skill_power": 100
+        }
+    }
+
+    results = run_all_scenarios(config)
+
+    baseline_damage = results[0]['damages']['normal']
+    buffed_damage = results[1]['damages']['normal']
+
+    expected_percent_change = ((buffed_damage - baseline_damage) / baseline_damage) * 100
+
+    assert abs(results[1]['percent_change'] - expected_percent_change) < 0.01
