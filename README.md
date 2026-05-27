@@ -2,6 +2,168 @@
 
 A damage calculation simulator for **Shin Megami Tensei V: Vengeance** to analyze buff/debuff mechanics through mathematical modeling.
 
+## Table of Contents
+
+- [Key Insights: Why Debuffs Beat Buffs](#key-insights-why-debuffs-beat-buffs)
+  - [The Math Behind It](#the-math-behind-it)
+  - [Skill Comparisons](#skill-comparisons)
+    - [Single-Target Buffs: Tarukaja vs Rakunda](#single-target-buffs-tarukaja-vs-rakunda)
+    - [Team Buff Skills: Turn Efficiency](#team-buff-skills-turn-efficiency)
+    - [Stacking Strategy: When to Use Both](#stacking-strategy-when-to-use-both)
+    - [LUC and Critical Hits](#luc-and-critical-hits)
+  - [Strategic Recommendations](#strategic-recommendations)
+- [Features](#features)
+- [Installation](#installation)
+  - [Requirements](#requirements)
+  - [Setup](#setup)
+- [Usage](#usage)
+  - [Quick Start](#quick-start)
+  - [Output](#output)
+- [Configuration](#configuration)
+  - [Combatant Stats](#combatant-stats)
+  - [Scenarios](#scenarios)
+  - [Formula Parameters](#formula-parameters)
+- [How It Works](#how-it-works)
+  - [Damage Calculation Flow](#damage-calculation-flow)
+  - [Buff Multipliers](#buff-multipliers)
+  - [Critical Rate Formula](#critical-rate-formula)
+  - [Formula Sources](#formula-sources)
+  - [Understanding Expected Damage](#understanding-expected-damage)
+- [Practical Examples](#practical-examples)
+- [Troubleshooting](#troubleshooting)
+- [Testing](#testing)
+- [Advanced Usage](#advanced-usage)
+- [Project Structure](#project-structure)
+- [FAQ](#faq)
+- [Performance Notes](#performance-notes)
+- [Future Enhancements](#future-enhancements)
+- [License](#license)
+- [Credits](#credits)
+- [Support](#support)
+
+## Key Insights: Why Debuffs Beat Buffs
+
+Have you ever wondered which matters more in SMTV combat: buffing your attack or debuffing enemy defense?
+
+**Spoiler: Enemy VIT debuffs beat STR buffs at most practical stack levels.**
+
+Systematic simulation shows Rakunda starts behind at ×1, then overtakes Tarukaja at ×2 and ×3. Reason sits inside formula structure.
+
+### The Math Behind It
+
+SMTV physical damage uses:
+
+```
+damage = (attacker_STR × skill_power) / defender_VIT
+```
+
+STR sits in numerator. VIT sits in denominator. That asymmetry drives result.
+
+**Buff multipliers** (full table in [Buff Multipliers](#buff-multipliers)):
+- +3 buff: 1.6× stat
+- +2 buff: 1.4× stat
+- +1 buff: 1.2× stat
+- -1 debuff: 0.85× stat
+- -2 debuff: 0.7× stat
+- -3 debuff: 0.6× stat
+
+**Example calculation** (Nahobino vs Daemon, skill power = 100):
+
+| Scenario | Formula | Damage | % Increase |
+|----------|---------|--------|------------|
+| Baseline | `(45 × 100) / 55` | 81.8 | — |
+| Tarukaja ×3 (+3 STR) | `(72 × 100) / 55` | 130.9 | +60.0% |
+| Rakunda ×3 (-3 VIT) | `(45 × 100) / 33` | 136.4 | +66.7% |
+
+Why debuffs win: lowering denominator scales harder than raising numerator here.  
+Math view: `1.6/1.0 = 1.6×` vs `1.0/0.6 = 1.67×`.
+
+### Skill Comparisons
+
+#### Single-Target Buffs: Tarukaja vs Rakunda
+
+At stack ×2 and ×3, Rakunda wins:
+
+| Stacks | Tarukaja % | Rakunda % | Winner |
+|--------|------------|-----------|--------|
+| ×1 | +20.0% | +17.6% | Tarukaja (slight edge) |
+| ×2 | +40.0% | +42.9% | Rakunda |
+| ×3 | +60.0% | +66.7% | Rakunda |
+
+**Source:** `output/batch_1_progressive_buffs.csv`
+
+<div align="center">
+  <img src="output/batch_1_scenario_comparison.png" alt="Progressive Buff Comparison">
+  <p><em>Figure 1: Tarukaja vs Rakunda damage scaling across stack levels</em></p>
+</div>
+
+#### Team Buff Skills: Turn Efficiency
+
+Multi-stat skills, one turn each:
+
+| Skill | Effect | Damage Increase | Turns |
+|-------|--------|-----------------|-------|
+| Baseline | — | 0% | — |
+| Heat Riser | Party: +2 STR/VIT/AGI | +40.0% | 1 |
+| Luster Candy | Party: +2 all stats | +40.0% | 1 |
+| Debilitate | Enemy: -2 all stats | +42.9% | 1 |
+
+**Source:** `output/batch_2_team_buffs.csv`
+
+Debilitate gives best physical damage return per turn. Heat Riser and Luster Candy tie for this physical model.
+
+#### Stacking Strategy: When to Use Both
+
+Combined buffs+debuffs scale multiplicatively:
+
+| Scenario | Damage | % Increase | Turns |
+|----------|--------|------------|-------|
+| Baseline | 81.8 | 0% | 0 |
+| Tarukaja ×2 | 114.5 | +40.0% | 2 |
+| Rakunda ×2 | 116.9 | +42.9% | 2 |
+| Tarukaja ×2 + Rakunda ×2 | 163.6 | +100.0% | 4 |
+
+**Source:** `output/batch_3_stacking.csv`
+
+<div align="center">
+  <img src="output/batch_3_scenario_comparison.png" alt="Stacking Scenarios">
+  <p><em>Figure 2: Buff + debuff combination is multiplicative, not additive</em></p>
+</div>
+
+At ×2: +40.0% plus +42.9% does **not** end at +82.9%; actual lands near +100%.
+
+#### LUC and Critical Hits
+
+LUC buffs raise crit rate, but expected damage gain stays modest:
+
+| LUC Difference | Base Crit Rate | With +3 LUC Buff | Increase |
+|----------------|----------------|------------------|----------|
+| 0 (equal LUC) | 5.0% | 9.2% | +4.2 pp |
+| +20 | 9.0% | 15.0% | +6.0 pp |
+| +40 | 13.0% | 21.4% | +8.4 pp |
+
+Expected damage comparison (same baseline stat profile):
+
+| Scenario | Expected Damage | % Increase |
+|----------|-----------------|------------|
+| Baseline | 83.9 | 0% |
+| +3 STR buff | 134.8 | +60.0% |
+| +3 LUC buff | 85.6 | +2.0% |
+
+**Source:** `output/batch_4_luc_impact.csv`
+
+<div align="center">
+  <img src="output/batch_4_luc_medium_scenario_comparison.png" alt="LUC Impact Analysis">
+  <p><em>Figure 3: LUC buffs increase crit chance, but expected damage gain remains small</em></p>
+</div>
+
+### Strategic Recommendations
+
+1. **If choosing one setup skill, pick debuff first.** Debilitate/Rakunda generally beat same-turn STR buffs.
+2. **Use combined setup for boss DPS windows.** Tarukaja ×2 + Rakunda ×2 reaches +100.0%.
+3. **Treat LUC as late optimization.** Useful for crit-focused setups, not primary damage lever.
+4. **Watch diminishing returns by stack count.** STR stacks stay +20.0 pp each in this model; Rakunda gains +25.3 pp then +23.8 pp.
+
 ## Features
 
 - **Physical damage calculation** using SMTV formulas
@@ -53,6 +215,11 @@ python3 -m src.runner
 
 # Run with custom config
 python3 -m src.runner path/to/custom_config.json
+
+# Run with custom output files (for batch analysis)
+python3 -m src.runner configs/batch_1_progressive.json \
+  --output output/batch_1_progressive_buffs.csv \
+  --output-prefix output/batch_1_
 ```
 
 ### Output
@@ -153,7 +320,7 @@ Three visualization types generated automatically:
 
 Edit `config.json` to customize your simulation. Config has three sections:
 
-### 1. Combatant Stats
+### Combatant Stats
 
 Define attacker and defender base stats (before buffs):
 
@@ -192,7 +359,7 @@ Define attacker and defender base stats (before buffs):
 - Endgame builds: 40-80 range
 - Use actual in-game stats for realistic results
 
-### 2. Scenarios
+### Scenarios
 
 List of buff/debuff situations to test. **First scenario = baseline** (used for % change calculations):
 
@@ -260,7 +427,7 @@ List of buff/debuff situations to test. **First scenario = baseline** (used for 
 
 **Important:** Always include baseline scenario (no buffs) as first entry for accurate % change calculations.
 
-### 3. Formula Parameters
+### Formula Parameters
 
 Adjust game mechanics constants:
 
@@ -355,6 +522,28 @@ Capped at 0% minimum, 100% maximum.
 - Each +1 attacker LUC buff = +20% more LUC stat
 - +3 LUC buff on base 35 = 56 effective LUC
 - Debuffing defender LUC increases your crit rate
+
+### Formula Sources
+
+Damage formula and multipliers in simulator follow community-researched SMTV mechanics:
+
+**Damage Formula (STR / VIT relationship):**
+- Source: [Megami Tensei Wiki - SMT V Battle Mechanics](https://megamitensei.fandom.com/wiki/Shin_Megami_Tensei_V/Battle_Mechanics)
+- Cross-checked against simulator batch outputs in this repository
+
+**Buff Multiplier Values (-3 to +3):**
+- Source: [SMT V GameFAQs Guide by Penguin_Knight](https://gamefaqs.gamespot.com/switch/315041-shin-megami-tensei-v/faqs/79611)
+- Matches multiplier table used in `src/combat_engine.py`
+
+**Critical Rate Formula (5% base + LUC difference):**
+- Source: Community testing and gameplay analysis
+- Implemented as `5% + (attacker_LUC - defender_LUC) × 0.2%`, clamped to [0%, 100%]
+
+**Weakness and Crit Multipliers (1.5× each):**
+- Source: In-game behavior and community documentation
+- Configurable in `config.json` and batch configs
+
+**Note:** Simulator models deterministic baseline formula behavior. It does not include every in-game factor (random variance, level correction, affinities, passives, equipment).
 
 ### Understanding Expected Damage
 

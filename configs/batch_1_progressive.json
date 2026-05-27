@@ -1,0 +1,76 @@
+{
+  "attacker": {
+    "name": "Nahobino",
+    "stats": {
+      "STR": 45,
+      "VIT": 38,
+      "MAG": 42,
+      "AGI": 40,
+      "LUC": 35
+    }
+  },
+  "defender": {
+    "name": "Daemon",
+    "stats": {
+      "STR": 50,
+      "VIT": 55,
+      "MAG": 40,
+      "AGI": 35,
+      "LUC": 30
+    }
+  },
+  "scenarios": [
+    {
+      "name": "Baseline",
+      "attacker_buffs": {},
+      "defender_buffs": {}
+    },
+    {
+      "name": "Tarukaja ×1",
+      "attacker_buffs": {
+        "STR": 1
+      },
+      "defender_buffs": {}
+    },
+    {
+      "name": "Tarukaja ×2",
+      "attacker_buffs": {
+        "STR": 2
+      },
+      "defender_buffs": {}
+    },
+    {
+      "name": "Tarukaja ×3",
+      "attacker_buffs": {
+        "STR": 3
+      },
+      "defender_buffs": {}
+    },
+    {
+      "name": "Rakunda ×1",
+      "attacker_buffs": {},
+      "defender_buffs": {
+        "VIT": -1
+      }
+    },
+    {
+      "name": "Rakunda ×2",
+      "attacker_buffs": {},
+      "defender_buffs": {
+        "VIT": -2
+      }
+    },
+    {
+      "name": "Rakunda ×3",
+      "attacker_buffs": {},
+      "defender_buffs": {
+        "VIT": -3
+      }
+    }
+  ],
+  "formulas": {
+    "weakness_multiplier": 1.5,
+    "crit_multiplier": 1.5,
+    "skill_power": 100
+  }
+}

@@ -274,6 +274,16 @@ def main() -> None:
         default='config.json',
         help='Path to configuration file (default: config.json)'
     )
+    parser.add_argument(
+        '--output',
+        default='output/results.csv',
+        help='Path to CSV output file (default: output/results.csv)'
+    )
+    parser.add_argument(
+        '--output-prefix',
+        default='output/',
+        help='Path prefix for graph outputs (default: output/)'
+    )
     args = parser.parse_args()
 
     try:
@@ -288,7 +298,7 @@ def main() -> None:
         print_table(results, config['attacker']['name'], config['defender']['name'])
 
         # Export CSV
-        csv_path = 'output/results.csv'
+        csv_path = args.output
         export_csv(results, csv_path)
 
         # Generate all graphs
@@ -306,17 +316,18 @@ def main() -> None:
             base_stats=config['defender']['stats']
         )
 
-        generate_all_graphs(results, engine, attacker, defender, 'output/')
+        generate_all_graphs(results, engine, attacker, defender, args.output_prefix)
 
         # Print completion summary
+        graph_prefix = args.output_prefix if args.output_prefix.endswith(('/', '_')) else f"{args.output_prefix}_"
         print("\n" + "=" * 80)
         print("SIMULATION COMPLETE")
         print("=" * 80)
-        print(f"Results exported to: {csv_path}")
-        print(f"Graphs generated in: output/")
-        print(f"  - output/scenario_comparison.png")
-        print(f"  - output/buff_progression.png")
-        print(f"  - output/buff_debuff_matrix.png")
+        print(f"Results exported to: {args.output}")
+        print(f"Graphs generated with prefix: {args.output_prefix}")
+        print(f"  - {graph_prefix}scenario_comparison.png")
+        print(f"  - {graph_prefix}buff_progression.png")
+        print(f"  - {graph_prefix}buff_debuff_matrix.png")
         print("=" * 80)
 
     except FileNotFoundError as e:

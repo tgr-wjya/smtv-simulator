@@ -12,7 +12,11 @@
       "Bash(zsh *)",
       "Bash(kitty --debug-config)",
       "Bash(cat)",
-      "Read(//home/jackieee/.config/**)"
+      "Read(//home/jackieee/.config/**)",
+      "Bash(git -C /var/home/jackieee/Documents/Projects/Personal/smtv-simulator add docs/superpowers/specs/2026-05-27-readme-insights-design.md)",
+      "Bash(git -C /var/home/jackieee/Documents/Projects/Personal/smtv-simulator commit -m ' *)",
+      "Bash(git -C /var/home/jackieee/Documents/Projects/Personal/smtv-simulator add docs/superpowers/plans/2026-05-27-readme-insights-implementation.md)",
+      "Bash(git -C /var/home/jackieee/Documents/Projects/Personal/smtv-simulator commit -m 'docs: add README insights implementation plan *)"
     ]
   }
 }

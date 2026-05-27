@@ -226,20 +226,23 @@ def generate_all_graphs(
     engine,
     attacker,
     defender,
-    output_dir: str = 'output/'
+    output_prefix: str = 'output/'
 ) -> None:
     """
-    Generate all graph types and save to output directory.
+    Generate all graph types and save using output path prefix.
 
     Args:
         results: List of scenario results
         engine: CombatEngine instance
         attacker: Attacker combatant
         defender: Defender combatant
-        output_dir: Directory to save graphs
+        output_prefix: Prefix for graph output paths
     """
-    generate_scenario_comparison(results, os.path.join(output_dir, 'scenario_comparison.png'))
-    generate_progressive_buff_chart(engine, attacker, defender, os.path.join(output_dir, 'buff_progression.png'))
-    generate_buff_debuff_matrix(engine, attacker, defender, os.path.join(output_dir, 'buff_debuff_matrix.png'))
+    if not output_prefix.endswith(('/', '_')):
+        output_prefix = f"{output_prefix}_"
 
-    print(f"\nAll graphs generated in {output_dir}")
+    generate_scenario_comparison(results, f'{output_prefix}scenario_comparison.png')
+    generate_progressive_buff_chart(engine, attacker, defender, f'{output_prefix}buff_progression.png')
+    generate_buff_debuff_matrix(engine, attacker, defender, f'{output_prefix}buff_debuff_matrix.png')
+
+    print(f"\nAll graphs generated with prefix: {output_prefix}")

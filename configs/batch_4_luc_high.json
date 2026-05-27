@@ -1,0 +1,41 @@
+{
+  "attacker": {
+    "name": "Nahobino",
+    "stats": {
+      "STR": 45,
+      "VIT": 38,
+      "MAG": 42,
+      "AGI": 40,
+      "LUC": 70
+    }
+  },
+  "defender": {
+    "name": "Daemon",
+    "stats": {
+      "STR": 50,
+      "VIT": 55,
+      "MAG": 40,
+      "AGI": 35,
+      "LUC": 30
+    }
+  },
+  "scenarios": [
+    {
+      "name": "Baseline",
+      "attacker_buffs": {},
+      "defender_buffs": {}
+    },
+    {
+      "name": "LUCKster (+3 LUC)",
+      "attacker_buffs": {
+        "LUC": 3
+      },
+      "defender_buffs": {}
+    }
+  ],
+  "formulas": {
+    "weakness_multiplier": 1.5,
+    "crit_multiplier": 1.5,
+    "skill_power": 100
+  }
+}
