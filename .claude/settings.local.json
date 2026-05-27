@@ -3,7 +3,16 @@
     "allow": [
       "Bash(python3 *)",
       "Bash(git add *)",
-      "Bash(git commit -m 'feat\\(combat_engine\\): implement calculate_crit_rate with TDD *)"
+      "Bash(git commit -m 'feat\\(combat_engine\\): implement calculate_crit_rate with TDD *)",
+      "Bash(brew *)",
+      "Bash(command -v eza)",
+      "Bash(command -v bat)",
+      "Bash(eza --version)",
+      "Bash(bat --version)",
+      "Bash(zsh *)",
+      "Bash(kitty --debug-config)",
+      "Bash(cat)",
+      "Read(//home/jackieee/.config/**)"
     ]
   }
 }
