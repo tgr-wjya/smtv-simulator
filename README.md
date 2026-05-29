@@ -93,7 +93,7 @@ At stack ×2 and ×3, Rakunda wins:
 **Source:** `output/batch_1_progressive_buffs.csv`
 
 <div align="center">
-  <img src="output/batch_1_scenario_comparison.png" alt="Progressive Buff Comparison">
+  <img src="docs/images/batch_1_scenario_comparison.png" alt="Progressive Buff Comparison">
   <p><em>Figure 1: Tarukaja vs Rakunda damage scaling across stack levels</em></p>
 </div>
 
@@ -126,7 +126,7 @@ Combined buffs+debuffs scale multiplicatively:
 **Source:** `output/batch_3_stacking.csv`
 
 <div align="center">
-  <img src="output/batch_3_scenario_comparison.png" alt="Stacking Scenarios">
+  <img src="docs/images/batch_3_scenario_comparison.png" alt="Stacking Scenarios">
   <p><em>Figure 2: Buff + debuff combination is multiplicative, not additive</em></p>
 </div>
 
@@ -153,7 +153,7 @@ Expected damage comparison (same baseline stat profile):
 **Source:** `output/batch_4_luc_impact.csv`
 
 <div align="center">
-  <img src="output/batch_4_luc_medium_scenario_comparison.png" alt="LUC Impact Analysis">
+  <img src="docs/images/batch_4_luc_medium_scenario_comparison.png" alt="LUC Impact Analysis">
   <p><em>Figure 3: LUC buffs increase crit chance, but expected damage gain remains small</em></p>
 </div>
 
