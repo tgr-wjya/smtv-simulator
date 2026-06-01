@@ -3,6 +3,8 @@ import csv
 import os
 import sys
 import argparse
+import statistics
+from pathlib import Path
 from typing import Any, Dict, List
 from copy import deepcopy
 from src.combat_engine import CombatEngine, Combatant
@@ -259,6 +261,123 @@ def export_csv(results: List[Dict[str, Any]], output_path: str) -> None:
     print(f"CSV exported to: {output_path}")
 
 
+def load_validation_scenario(scenario_path: str) -> Dict[str, Any]:
+    """
+    Load a validation scenario from JSON file.
+    
+    Args:
+        scenario_path: Path to validation scenario JSON
+    
+    Returns:
+        Validation scenario dictionary
+    """
+    with open(scenario_path, 'r') as f:
+        scenario = json.load(f)
+    return scenario
+
+
+def run_validation_scenario(
+    engine: CombatEngine,
+    scenario_config: Dict[str, Any],
+    num_trials: int = 100
+) -> Dict[str, Any]:
+    """
+    Run a single validation scenario with multiple trials.
+    
+    Args:
+        engine: CombatEngine instance
+        scenario_config: Scenario configuration dict
+        num_trials: Number of trials to run
+    
+    Returns:
+        Dictionary with mean, std, min, max damage
+    """
+    attacker_cfg = scenario_config["attacker"]
+    defender_cfg = scenario_config["defender"]
+    skill_cfg = scenario_config["skill"]
+    
+    # Create combatants
+    attacker = Combatant(
+        name=attacker_cfg["name"],
+        base_stats=attacker_cfg["stats"],
+        level=attacker_cfg["level"],
+        skill_potentials=attacker_cfg.get("skill_potentials", {}),
+        charge_state=attacker_cfg.get("charge_state"),
+        passive_abilities=attacker_cfg.get("passive_abilities", [])
+    )
+    defender = Combatant(
+        name=defender_cfg["name"],
+        base_stats=defender_cfg["stats"],
+        level=defender_cfg["level"],
+        guarding=defender_cfg.get("guarding", False),
+        doubler_active=defender_cfg.get("doubler_active", False)
+    )
+    
+    # Apply buffs
+    for stat_key, level in attacker_cfg.get("buffs", {}).items():
+        if stat_key == "attack" and level != 0:
+            attacker.buff_levels['STR'] = level
+        elif stat_key == "defense" and level != 0:
+            attacker.buff_levels['VIT'] = level
+    
+    for stat_key, level in defender_cfg.get("buffs", {}).items():
+        if stat_key == "attack" and level != 0:
+            defender.buff_levels['STR'] = level
+        elif stat_key == "defense" and level != 0:
+            defender.buff_levels['VIT'] = level
+    
+    # Run trials
+    damages = []
+    for _ in range(num_trials):
+        damage = engine.calculate_vengeance_damage(
+            attacker=attacker,
+            defender=defender,
+            skill_element=skill_cfg["element"],
+            resistance=defender_cfg.get("resistance", "neutral"),
+            is_crit=skill_cfg.get("is_crit", False)
+        )
+        damages.append(damage)
+    
+    return {
+        "name": scenario_config["name"],
+        "mean": statistics.mean(damages),
+        "std": statistics.stdev(damages) if len(damages) > 1 else 0.0,
+        "min": min(damages),
+        "max": max(damages),
+        "config": scenario_config
+    }
+
+
+def run_validation_suite(
+    validation_dir: str,
+    num_trials: int = 100
+) -> Dict[str, Dict[str, Any]]:
+    """
+    Run all validation scenarios in directory.
+    
+    Args:
+        validation_dir: Path to directory containing validation JSON files
+        num_trials: Number of trials per scenario
+    
+    Returns:
+        Dictionary mapping scenario name to statistics
+    """
+    engine = CombatEngine(skill_power=100)
+    results = {}
+    
+    validation_path = Path(validation_dir)
+    scenario_files = sorted(validation_path.glob("*.json"))
+    
+    for scenario_file in scenario_files:
+        scenario_data = load_validation_scenario(str(scenario_file))
+        
+        for sub_scenario in scenario_data["scenarios"]:
+            result = run_validation_scenario(engine, sub_scenario, num_trials)
+            results[result["name"]] = result
+    
+    return results
+
+
 def main() -> None:
     """
     Main entry point for SMTV Combat Simulator.
@@ -286,9 +405,82 @@ def main() -> None:
         default='output/',
         help='Path prefix for graph outputs (default: output/)'
     )
+    parser.add_argument(
+        '--validate',
+        action='store_true',
+        help='Run validation suite mode'
+    )
+    parser.add_argument(
+        '--validation-dir',
+        default='config/validation/',
+        help='Path to validation scenarios directory (default: config/validation/)'
+    )
+    parser.add_argument(
+        '--trials',
+        type=int,
+        default=100,
+        help='Number of trials per validation scenario (default: 100)'
+    )
+    parser.add_argument(
+        '--gui',
+        action='store_true',
+        help='Launch the Shin Megami Tensei V interactive GUI'
+    )
     args = parser.parse_args()
 
     try:
+        # GUI mode
+        if args.gui:
+            print("Launching SMTV Vengeance Interactive GUI...")
+            from src.gui import SMTV_GUI
+            app = SMTV_GUI()
+            app.mainloop()
+            return
+
+        # Validation mode
+        if args.validate:
+            print(f"Running validation suite from: {args.validation_dir}")
+            print(f"Trials per scenario: {args.trials}")
+            print()
+            
+            results = run_validation_suite(args.validation_dir, args.trials)
+            
+            # Print results table
+            print("=" * 80)
+            print("VALIDATION RESULTS")
+            print("=" * 80)
+            print(f"{'Scenario':<50} {'Mean':>10} {'Std':>10} {'Min':>10} {'Max':>10}")
+            print("-" * 80)
+            
+            for scenario_name, stats in results.items():
+                print(f"{scenario_name:<50} {stats['mean']:>10.1f} {stats['std']:>10.2f} {stats['min']:>10.1f} {stats['max']:>10.1f}")
+            
+            print("=" * 80)
+            
+            # Export CSV
+            output_dir = Path("output/validation")
+            output_dir.mkdir(parents=True, exist_ok=True)
+            
+            csv_path = output_dir / "validation_results.csv"
+            with open(csv_path, 'w', newline='') as csvfile:
+                writer = csv.DictWriter(csvfile, fieldnames=['scenario', 'mean', 'std', 'min', 'max'])
+                writer.writeheader()
+                for scenario_name, stats in results.items():
+                    writer.writerow({
+                        'scenario': scenario_name,
+                        'mean': f"{stats['mean']:.1f}",
+                        'std': f"{stats['std']:.2f}",
+                        'min': f"{stats['min']:.1f}",
+                        'max': f"{stats['max']:.1f}"
+                    })
+            
+            print(f"\nValidation results exported to: {csv_path}")
+            
+            # Generate validation visualizations
+            from src.visualizer import generate_validation_report
+            generate_validation_report(results, "output/validation")
+            return
+
         # Load configuration
         config = load_config(args.config)
         print(f"Loaded config from: {args.config}")
