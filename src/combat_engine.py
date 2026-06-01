@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Dict
+from typing import Dict, Optional, List
 
 
 # Buff multiplier constants (used by both Combatant and CombatEngine)
@@ -19,9 +19,17 @@ class Combatant:
     """Represents an entity in combat with stats and buff state"""
     name: str
     base_stats: Dict[str, int]
+    level: int
     buff_levels: Dict[str, int] = field(default_factory=lambda: {
         'STR': 0, 'VIT': 0, 'MAG': 0, 'AGI': 0, 'LUC': 0
     })
+
+    # New Vengeance fields
+    skill_potentials: Dict[str, int] = field(default_factory=dict)
+    charge_state: Optional[str] = None
+    passive_abilities: List[str] = field(default_factory=list)
+    guarding: bool = False
+    doubler_active: bool = False
 
     def get_effective_stat(self, stat: str) -> float:
         """Calculate effective stat value with buff multiplier applied"""

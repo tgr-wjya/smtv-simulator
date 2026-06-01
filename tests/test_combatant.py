@@ -5,7 +5,7 @@ from src.combat_engine import Combatant
 def test_combatant_initialization():
     """Test Combatant stores name and stats correctly"""
     stats = {'STR': 45, 'VIT': 38, 'MAG': 42, 'AGI': 40, 'LUC': 35}
-    combatant = Combatant(name="Nahobino", base_stats=stats)
+    combatant = Combatant(name="Nahobino", base_stats=stats, level=50)
 
     assert combatant.name == "Nahobino"
     assert combatant.base_stats['STR'] == 45
@@ -19,7 +19,7 @@ def test_combatant_initialization():
 def test_get_effective_stat_no_buffs():
     """Test effective stat equals base stat when no buffs"""
     stats = {'STR': 45, 'VIT': 38, 'MAG': 42, 'AGI': 40, 'LUC': 35}
-    combatant = Combatant(name="Nahobino", base_stats=stats)
+    combatant = Combatant(name="Nahobino", base_stats=stats, level=50)
 
     assert combatant.get_effective_stat('STR') == 45.0
     assert combatant.get_effective_stat('VIT') == 38.0
@@ -28,7 +28,7 @@ def test_get_effective_stat_no_buffs():
 def test_get_effective_stat_with_buffs():
     """Test effective stat applies buff multiplier"""
     stats = {'STR': 100, 'VIT': 100, 'MAG': 100, 'AGI': 100, 'LUC': 100}
-    combatant = Combatant(name="Test", base_stats=stats)
+    combatant = Combatant(name="Test", base_stats=stats, level=50)
 
     # +3 buff = 1.6x multiplier
     combatant.buff_levels['STR'] = 3
@@ -42,7 +42,7 @@ def test_get_effective_stat_with_buffs():
 def test_apply_buff_increases_level():
     """Test apply_buff increases buff level"""
     stats = {'STR': 50, 'VIT': 50, 'MAG': 50, 'AGI': 50, 'LUC': 50}
-    combatant = Combatant(name="Test", base_stats=stats)
+    combatant = Combatant(name="Test", base_stats=stats, level=50)
 
     combatant.apply_buff('STR', 2)
     assert combatant.buff_levels['STR'] == 2
@@ -54,7 +54,7 @@ def test_apply_buff_increases_level():
 def test_apply_buff_caps_at_positive_3():
     """Test buff level cannot exceed +3"""
     stats = {'STR': 50, 'VIT': 50, 'MAG': 50, 'AGI': 50, 'LUC': 50}
-    combatant = Combatant(name="Test", base_stats=stats)
+    combatant = Combatant(name="Test", base_stats=stats, level=50)
 
     combatant.apply_buff('STR', 5)
     assert combatant.buff_levels['STR'] == 3
@@ -63,7 +63,7 @@ def test_apply_buff_caps_at_positive_3():
 def test_apply_buff_caps_at_negative_3():
     """Test buff level cannot go below -3"""
     stats = {'STR': 50, 'VIT': 50, 'MAG': 50, 'AGI': 50, 'LUC': 50}
-    combatant = Combatant(name="Test", base_stats=stats)
+    combatant = Combatant(name="Test", base_stats=stats, level=50)
 
     combatant.apply_buff('VIT', -5)
     assert combatant.buff_levels['VIT'] == -3
@@ -72,7 +72,7 @@ def test_apply_buff_caps_at_negative_3():
 def test_apply_all_buffs():
     """Test apply_all_buffs affects all stats"""
     stats = {'STR': 50, 'VIT': 50, 'MAG': 50, 'AGI': 50, 'LUC': 50}
-    combatant = Combatant(name="Test", base_stats=stats)
+    combatant = Combatant(name="Test", base_stats=stats, level=50)
 
     combatant.apply_all_buffs(2)
 
@@ -86,7 +86,7 @@ def test_apply_all_buffs():
 def test_apply_all_buffs_respects_individual_caps():
     """Test apply_all_buffs clamps each stat independently"""
     stats = {'STR': 50, 'VIT': 50, 'MAG': 50, 'AGI': 50, 'LUC': 50}
-    combatant = Combatant(name="Test", base_stats=stats)
+    combatant = Combatant(name="Test", base_stats=stats, level=50)
 
     # Pre-buff STR to +2
     combatant.buff_levels['STR'] = 2

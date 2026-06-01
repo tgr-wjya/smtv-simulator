@@ -206,8 +206,8 @@ def test_run_scenario_no_buffs():
     attacker_stats = {'STR': 50, 'VIT': 50, 'MAG': 50, 'AGI': 50, 'LUC': 50}
     defender_stats = {'STR': 50, 'VIT': 50, 'MAG': 50, 'AGI': 50, 'LUC': 50}
 
-    attacker = Combatant(name="Attacker", base_stats=attacker_stats)
-    defender = Combatant(name="Defender", base_stats=defender_stats)
+    attacker = Combatant(name="Attacker", base_stats=attacker_stats, level=50)
+    defender = Combatant(name="Defender", base_stats=defender_stats, level=50)
 
     scenario = {
         "name": "No buffs",
@@ -232,8 +232,8 @@ def test_run_scenario_with_buffs():
     attacker_stats = {'STR': 50, 'VIT': 50, 'MAG': 50, 'AGI': 50, 'LUC': 50}
     defender_stats = {'STR': 50, 'VIT': 50, 'MAG': 50, 'AGI': 50, 'LUC': 50}
 
-    attacker = Combatant(name="Attacker", base_stats=attacker_stats)
-    defender = Combatant(name="Defender", base_stats=defender_stats)
+    attacker = Combatant(name="Attacker", base_stats=attacker_stats, level=50)
+    defender = Combatant(name="Defender", base_stats=defender_stats, level=50)
 
     scenario = {
         "name": "Buffs test",

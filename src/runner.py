@@ -105,11 +105,13 @@ def run_all_scenarios(config: Dict[str, Any]) -> List[Dict[str, Any]]:
     # Create combatants
     attacker = Combatant(
         name=config['attacker']['name'],
-        base_stats=config['attacker']['stats']
+        base_stats=config['attacker']['stats'],
+        level=config['attacker'].get('level', 50)
     )
     defender = Combatant(
         name=config['defender']['name'],
-        base_stats=config['defender']['stats']
+        base_stats=config['defender']['stats'],
+        level=config['defender'].get('level', 50)
     )
 
     # Run all scenarios
@@ -309,11 +311,13 @@ def main() -> None:
         )
         attacker = Combatant(
             name=config['attacker']['name'],
-            base_stats=config['attacker']['stats']
+            base_stats=config['attacker']['stats'],
+            level=config['attacker'].get('level', 50)
         )
         defender = Combatant(
             name=config['defender']['name'],
-            base_stats=config['defender']['stats']
+            base_stats=config['defender']['stats'],
+            level=config['defender'].get('level', 50)
         )
 
         generate_all_graphs(results, engine, attacker, defender, args.output_prefix)

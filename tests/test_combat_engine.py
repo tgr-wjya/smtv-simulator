@@ -31,8 +31,8 @@ def test_calculate_base_damage_no_buffs():
     attacker_stats = {'STR': 50, 'VIT': 40, 'MAG': 40, 'AGI': 40, 'LUC': 40}
     defender_stats = {'STR': 40, 'VIT': 50, 'MAG': 40, 'AGI': 40, 'LUC': 40}
 
-    attacker = Combatant(name="Attacker", base_stats=attacker_stats)
-    defender = Combatant(name="Defender", base_stats=defender_stats)
+    attacker = Combatant(name="Attacker", base_stats=attacker_stats, level=50)
+    defender = Combatant(name="Defender", base_stats=defender_stats, level=50)
 
     damage = engine.calculate_base_damage(attacker, defender)
 
@@ -47,8 +47,8 @@ def test_calculate_base_damage_with_buffs():
     attacker_stats = {'STR': 50, 'VIT': 40, 'MAG': 40, 'AGI': 40, 'LUC': 40}
     defender_stats = {'STR': 40, 'VIT': 50, 'MAG': 40, 'AGI': 40, 'LUC': 40}
 
-    attacker = Combatant(name="Attacker", base_stats=attacker_stats)
-    defender = Combatant(name="Defender", base_stats=defender_stats)
+    attacker = Combatant(name="Attacker", base_stats=attacker_stats, level=50)
+    defender = Combatant(name="Defender", base_stats=defender_stats, level=50)
 
     # Attacker +3 STR (1.6x), Defender -2 VIT (0.7x)
     attacker.buff_levels['STR'] = 3
@@ -67,8 +67,8 @@ def test_calculate_crit_rate_equal_luck():
     attacker_stats = {'STR': 50, 'VIT': 40, 'MAG': 40, 'AGI': 40, 'LUC': 40}
     defender_stats = {'STR': 40, 'VIT': 50, 'MAG': 40, 'AGI': 40, 'LUC': 40}
 
-    attacker = Combatant(name="Attacker", base_stats=attacker_stats)
-    defender = Combatant(name="Defender", base_stats=defender_stats)
+    attacker = Combatant(name="Attacker", base_stats=attacker_stats, level=50)
+    defender = Combatant(name="Defender", base_stats=defender_stats, level=50)
 
     crit_rate = engine.calculate_crit_rate(attacker, defender)
 
@@ -83,8 +83,8 @@ def test_calculate_crit_rate_higher_attacker_luck():
     attacker_stats = {'STR': 50, 'VIT': 40, 'MAG': 40, 'AGI': 40, 'LUC': 60}
     defender_stats = {'STR': 40, 'VIT': 50, 'MAG': 40, 'AGI': 40, 'LUC': 40}
 
-    attacker = Combatant(name="Attacker", base_stats=attacker_stats)
-    defender = Combatant(name="Defender", base_stats=defender_stats)
+    attacker = Combatant(name="Attacker", base_stats=attacker_stats, level=50)
+    defender = Combatant(name="Defender", base_stats=defender_stats, level=50)
 
     crit_rate = engine.calculate_crit_rate(attacker, defender)
 
@@ -99,8 +99,8 @@ def test_calculate_crit_rate_lower_attacker_luck():
     attacker_stats = {'STR': 50, 'VIT': 40, 'MAG': 40, 'AGI': 40, 'LUC': 20}
     defender_stats = {'STR': 40, 'VIT': 50, 'MAG': 40, 'AGI': 40, 'LUC': 40}
 
-    attacker = Combatant(name="Attacker", base_stats=attacker_stats)
-    defender = Combatant(name="Defender", base_stats=defender_stats)
+    attacker = Combatant(name="Attacker", base_stats=attacker_stats, level=50)
+    defender = Combatant(name="Defender", base_stats=defender_stats, level=50)
 
     crit_rate = engine.calculate_crit_rate(attacker, defender)
 
@@ -115,8 +115,8 @@ def test_calculate_crit_rate_with_luck_buffs():
     attacker_stats = {'STR': 50, 'VIT': 40, 'MAG': 40, 'AGI': 40, 'LUC': 50}
     defender_stats = {'STR': 40, 'VIT': 50, 'MAG': 40, 'AGI': 40, 'LUC': 50}
 
-    attacker = Combatant(name="Attacker", base_stats=attacker_stats)
-    defender = Combatant(name="Defender", base_stats=defender_stats)
+    attacker = Combatant(name="Attacker", base_stats=attacker_stats, level=50)
+    defender = Combatant(name="Defender", base_stats=defender_stats, level=50)
 
     # Attacker +1 LUC (1.2x), Defender -1 LUC (0.85x)
     attacker.buff_levels['LUC'] = 1
@@ -136,8 +136,8 @@ def test_calculate_crit_rate_capped_at_100_percent():
     attacker_stats = {'STR': 50, 'VIT': 40, 'MAG': 40, 'AGI': 40, 'LUC': 100}
     defender_stats = {'STR': 40, 'VIT': 50, 'MAG': 40, 'AGI': 40, 'LUC': 1}
 
-    attacker = Combatant(name="Attacker", base_stats=attacker_stats)
-    defender = Combatant(name="Defender", base_stats=defender_stats)
+    attacker = Combatant(name="Attacker", base_stats=attacker_stats, level=50)
+    defender = Combatant(name="Defender", base_stats=defender_stats, level=50)
 
     crit_rate = engine.calculate_crit_rate(attacker, defender)
 
@@ -153,8 +153,8 @@ def test_calculate_crit_rate_minimum_at_zero_percent():
     attacker_stats = {'STR': 50, 'VIT': 40, 'MAG': 40, 'AGI': 40, 'LUC': 1}
     defender_stats = {'STR': 40, 'VIT': 50, 'MAG': 40, 'AGI': 40, 'LUC': 100}
 
-    attacker = Combatant(name="Attacker", base_stats=attacker_stats)
-    defender = Combatant(name="Defender", base_stats=defender_stats)
+    attacker = Combatant(name="Attacker", base_stats=attacker_stats, level=50)
+    defender = Combatant(name="Defender", base_stats=defender_stats, level=50)
 
     crit_rate = engine.calculate_crit_rate(attacker, defender)
 
@@ -170,8 +170,8 @@ def test_calculate_damage_normal():
     attacker_stats = {'STR': 50, 'VIT': 40, 'MAG': 40, 'AGI': 40, 'LUC': 40}
     defender_stats = {'STR': 40, 'VIT': 50, 'MAG': 40, 'AGI': 40, 'LUC': 40}
 
-    attacker = Combatant(name="Attacker", base_stats=attacker_stats)
-    defender = Combatant(name="Defender", base_stats=defender_stats)
+    attacker = Combatant(name="Attacker", base_stats=attacker_stats, level=50)
+    defender = Combatant(name="Defender", base_stats=defender_stats, level=50)
 
     damage = engine.calculate_damage(attacker, defender, is_weakness=False, is_crit=False)
 
@@ -187,8 +187,8 @@ def test_calculate_damage_weakness_only():
     attacker_stats = {'STR': 50, 'VIT': 40, 'MAG': 40, 'AGI': 40, 'LUC': 40}
     defender_stats = {'STR': 40, 'VIT': 50, 'MAG': 40, 'AGI': 40, 'LUC': 40}
 
-    attacker = Combatant(name="Attacker", base_stats=attacker_stats)
-    defender = Combatant(name="Defender", base_stats=defender_stats)
+    attacker = Combatant(name="Attacker", base_stats=attacker_stats, level=50)
+    defender = Combatant(name="Defender", base_stats=defender_stats, level=50)
 
     damage = engine.calculate_damage(attacker, defender, is_weakness=True, is_crit=False)
 
@@ -204,8 +204,8 @@ def test_calculate_damage_crit_only():
     attacker_stats = {'STR': 50, 'VIT': 40, 'MAG': 40, 'AGI': 40, 'LUC': 40}
     defender_stats = {'STR': 40, 'VIT': 50, 'MAG': 40, 'AGI': 40, 'LUC': 40}
 
-    attacker = Combatant(name="Attacker", base_stats=attacker_stats)
-    defender = Combatant(name="Defender", base_stats=defender_stats)
+    attacker = Combatant(name="Attacker", base_stats=attacker_stats, level=50)
+    defender = Combatant(name="Defender", base_stats=defender_stats, level=50)
 
     damage = engine.calculate_damage(attacker, defender, is_weakness=False, is_crit=True)
 
@@ -221,8 +221,8 @@ def test_calculate_damage_weakness_and_crit():
     attacker_stats = {'STR': 50, 'VIT': 40, 'MAG': 40, 'AGI': 40, 'LUC': 40}
     defender_stats = {'STR': 40, 'VIT': 50, 'MAG': 40, 'AGI': 40, 'LUC': 40}
 
-    attacker = Combatant(name="Attacker", base_stats=attacker_stats)
-    defender = Combatant(name="Defender", base_stats=defender_stats)
+    attacker = Combatant(name="Attacker", base_stats=attacker_stats, level=50)
+    defender = Combatant(name="Defender", base_stats=defender_stats, level=50)
 
     damage = engine.calculate_damage(attacker, defender, is_weakness=True, is_crit=True)
 
@@ -239,8 +239,8 @@ def test_calculate_expected_damage_no_weakness():
     attacker_stats = {'STR': 50, 'VIT': 40, 'MAG': 40, 'AGI': 40, 'LUC': 40}
     defender_stats = {'STR': 40, 'VIT': 50, 'MAG': 40, 'AGI': 40, 'LUC': 40}
 
-    attacker = Combatant(name="Attacker", base_stats=attacker_stats)
-    defender = Combatant(name="Defender", base_stats=defender_stats)
+    attacker = Combatant(name="Attacker", base_stats=attacker_stats, level=50)
+    defender = Combatant(name="Defender", base_stats=defender_stats, level=50)
 
     expected_damage = engine.calculate_expected_damage(attacker, defender, is_weakness=False)
 
@@ -258,8 +258,8 @@ def test_calculate_expected_damage_with_weakness():
     attacker_stats = {'STR': 50, 'VIT': 40, 'MAG': 40, 'AGI': 40, 'LUC': 40}
     defender_stats = {'STR': 40, 'VIT': 50, 'MAG': 40, 'AGI': 40, 'LUC': 40}
 
-    attacker = Combatant(name="Attacker", base_stats=attacker_stats)
-    defender = Combatant(name="Defender", base_stats=defender_stats)
+    attacker = Combatant(name="Attacker", base_stats=attacker_stats, level=50)
+    defender = Combatant(name="Defender", base_stats=defender_stats, level=50)
 
     expected_damage = engine.calculate_expected_damage(attacker, defender, is_weakness=True)
 
