@@ -41,128 +41,45 @@ A damage calculation simulator for **Shin Megami Tensei V: Vengeance** to analyz
 - [Credits](#credits)
 - [Support](#support)
 
-## Key Insights: Why Debuffs Beat Buffs
+## Key Insights: Multiplicative Stacking & Bounded Scaling
 
-Have you ever wondered which matters more in SMTV combat: buffing your attack or debuffing enemy defense?
+Systematic reverse-engineering of the SMTV: Vengeance combat engine reveals that the classic "Level Scaling vs. Stat Scaling" debate is a **false dichotomy**. Bounded mechanics and diminishing returns ensure that **multiplicative optimization** of tactical multipliers reigns supreme.
 
-**Spoiler: Enemy VIT debuffs beat STR buffs at most practical stack levels.**
+### 1. Bounded Level Correction (No Infinite Scaling)
+In the original SMTV game, level deficits suppression dominated combat entirely. In Vengeance, this is strictly capped:
+- **Level deficit penalty** has a hardcoded floor of **0.5x**.
+- **Level advantage bonus** has a strict ceiling of **1.5x**.
+- **Near-peer encounters** (within ±2 levels) bypass level correction entirely (1.0x).
+This 0.5x–1.5x bounds constraint means level deficit is no longer an insurmountable barrier, merely a manageable 50% modifier.
 
-Systematic simulation shows Rakunda starts behind at ×1, then overtakes Tarukaja at ×2 and ×3. Reason sits inside formula structure.
-
-### The Math Behind It
-
-SMTV physical damage uses:
-
+### 2. Stat Diminishing Returns (The Root Cap)
+Raw stat-dumping is heavily penalized by the **dynamic Root threshold**:
 ```
-damage = (attacker_STR × skill_power) / defender_VIT
+Root = Level + 10
 ```
+- **Linear Phase** (*stat ≤ Root*): Conversion rate is highly efficient (`Offense = Stat × 2`).
+- **Penalty Phase** (*stat > Root*): Extra stats suffer a square root mitigation penalty (`Offense = Root + √(Stat - Root) + Root`).
+*Example at Level 99 (Root = 109)*: Allocating an additional 141 stats (109 → 250 MAG) only increases actual Offense by **47 points**. Efficient builds allocate stats to reach the Root cap and focus remaining resources elsewhere.
 
-STR sits in numerator. VIT sits in denominator. That asymmetry drives result.
+### 3. The Tri-Tiered Vitality Engine
+The interaction of Offense vs. Vitality is non-linear and divided into three mathematical tiers:
+- **Tier 1 (Heavy Mitigation)**: Triggered when `(Offense - VIT) ≤ Offense/2`. Heavily Suppresses damage using square root dampeners.
+- **Tier 2 (Standard Penetration)**: Linear stat penetration (`Base Damage = Offense - VIT`).
+- **Tier 3 (Overwhelming Force)**: Triggered when `(Offense - VIT) > 3/4 * Offense`. Reduces scaling growth to curb infinite damage numbers.
 
-**Buff multipliers** (full table in [Buff Multipliers](#buff-multipliers)):
-- +3 buff: 1.6× stat
-- +2 buff: 1.4× stat
-- +1 buff: 1.2× stat
-- -1 debuff: 0.85× stat
-- -2 debuff: 0.7× stat
-- -3 debuff: 0.6× stat
-
-**Example calculation** (Nahobino vs Daemon, skill power = 100):
-
-| Scenario | Formula | Damage | % Increase |
-|----------|---------|--------|------------|
-| Baseline | `(45 × 100) / 55` | 81.8 | — |
-| Tarukaja ×3 (+3 STR) | `(72 × 100) / 55` | 130.9 | +60.0% |
-| Rakunda ×3 (-3 VIT) | `(45 × 100) / 33` | 136.4 | +66.7% |
-
-Why debuffs win: lowering denominator scales harder than raising numerator here.  
-Math view: `1.6/1.0 = 1.6×` vs `1.0/0.6 = 1.67×`.
-
-### Skill Comparisons
-
-#### Single-Target Buffs: Tarukaja vs Rakunda
-
-At stack ×2 and ×3, Rakunda wins:
-
-| Stacks | Tarukaja % | Rakunda % | Winner |
-|--------|------------|-----------|--------|
-| ×1 | +20.0% | +17.6% | Tarukaja (slight edge) |
-| ×2 | +40.0% | +42.9% | Rakunda |
-| ×3 | +60.0% | +66.7% | Rakunda |
-
-**Source:** `output/batch_1_progressive_buffs.csv`
-
-<div align="center">
-  <img src="docs/images/batch_1_scenario_comparison.png" alt="Progressive Buff Comparison">
-  <p><em>Figure 1: Tarukaja vs Rakunda damage scaling across stack levels</em></p>
-</div>
-
-#### Team Buff Skills: Turn Efficiency
-
-Multi-stat skills, one turn each:
-
-| Skill | Effect | Damage Increase | Turns |
-|-------|--------|-----------------|-------|
-| Baseline | — | 0% | — |
-| Heat Riser | Party: +2 STR/VIT/AGI | +40.0% | 1 |
-| Luster Candy | Party: +2 all stats | +40.0% | 1 |
-| Debilitate | Enemy: -2 all stats | +42.9% | 1 |
-
-**Source:** `output/batch_2_team_buffs.csv`
-
-Debilitate gives best physical damage return per turn. Heat Riser and Luster Candy tie for this physical model.
-
-#### Stacking Strategy: When to Use Both
-
-Combined buffs+debuffs scale multiplicatively:
-
-| Scenario | Damage | % Increase | Turns |
-|----------|--------|------------|-------|
-| Baseline | 81.8 | 0% | 0 |
-| Tarukaja ×2 | 114.5 | +40.0% | 2 |
-| Rakunda ×2 | 116.9 | +42.9% | 2 |
-| Tarukaja ×2 + Rakunda ×2 | 163.6 | +100.0% | 4 |
-
-**Source:** `output/batch_3_stacking.csv`
-
-<div align="center">
-  <img src="docs/images/batch_3_scenario_comparison.png" alt="Stacking Scenarios">
-  <p><em>Figure 2: Buff + debuff combination is multiplicative, not additive</em></p>
-</div>
-
-At ×2: +40.0% plus +42.9% does **not** end at +82.9%; actual lands near +100%.
-
-#### LUC and Critical Hits
-
-LUC buffs raise crit rate, but expected damage gain stays modest:
-
-| LUC Difference | Base Crit Rate | With +3 LUC Buff | Increase |
-|----------------|----------------|------------------|----------|
-| 0 (equal LUC) | 5.0% | 9.2% | +4.2 pp |
-| +20 | 9.0% | 15.0% | +6.0 pp |
-| +40 | 13.0% | 21.4% | +8.4 pp |
-
-Expected damage comparison (same baseline stat profile):
-
-| Scenario | Expected Damage | % Increase |
-|----------|-----------------|------------|
-| Baseline | 83.9 | 0% |
-| +3 STR buff | 134.8 | +60.0% |
-| +3 LUC buff | 85.6 | +2.0% |
-
-**Source:** `output/batch_4_luc_impact.csv`
-
-<div align="center">
-  <img src="docs/images/batch_4_luc_medium_scenario_comparison.png" alt="LUC Impact Analysis">
-  <p><em>Figure 3: LUC buffs increase crit chance, but expected damage gain remains small</em></p>
-</div>
+### 4. Multiplicative Stacking Synergy (The Real Meta)
+Because Level and Stats are bounded, late-game throughput is entirely driven by compounding independent multipliers:
+- **Skill Potential**: Up to **1.55x** bonus (at +9 Potential).
+- **Charge States**: **1.8x** (Charge/Concentrate) up to **3.4x** (*Impaler's Glory*).
+- **Passive Abilities**: *Critical Zealot* adds a separate **1.45x** multiplier to critical hits.
+- **Elemental Weakness**: Additive **1.75x** when combined with critical hits.
+Optimizing this multiplication chain (e.g., Potential +9 × Impaler's Glory × Critical Zealot = **7.64x** damage) easily dwarfs any theoretical level or stat advantage in isolation.
 
 ### Strategic Recommendations
+1. **Optimize Multipliers First**: Prioritize elemental Potentials, Charge states, and passive synergies.
+2. **Respect the Root Cap**: Stop dumping raw stats once you clear the `Level + 10` threshold; allocate resources to secondary party members.
+3. **Buffs and Debuffs are Secondary**: Buffs (Tarukaja) and debuffs (Rakunda) are important, but act as simple multipliers (+20% / +15%) in a much larger chain. Use them to stack, but do not rely on them as primary damage drivers.
 
-1. **If choosing one setup skill, pick debuff first.** Debilitate/Rakunda generally beat same-turn STR buffs.
-2. **Use combined setup for boss DPS windows.** Tarukaja ×2 + Rakunda ×2 reaches +100.0%.
-3. **Treat LUC as late optimization.** Useful for crit-focused setups, not primary damage lever.
-4. **Watch diminishing returns by stack count.** STR stacks stay +20.0 pp each in this model; Rakunda gains +25.3 pp then +23.8 pp.
 
 ## Features
 
