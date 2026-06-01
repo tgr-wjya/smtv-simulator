@@ -1,0 +1,57 @@
+{
+  "name": "Stat Dumping vs Root Cap",
+  "description": "Proves Root diminishing returns punish stat dumping",
+  "trials": 100,
+  "scenarios": [
+    {
+      "name": "250 MAG (Heavy Root Penalty)",
+      "attacker": {
+        "name": "Stat Dumper",
+        "level": 99,
+        "stats": {"STR": 40, "VIT": 80, "MAG": 250, "AGI": 40, "LUC": 70},
+        "buffs": {"attack": 0, "defense": 0},
+        "skill_potentials": {},
+        "charge_state": null,
+        "passive_abilities": []
+      },
+      "defender": {
+        "name": "Standard Enemy",
+        "level": 95,
+        "stats": {"STR": 40, "VIT": 80, "MAG": 40, "AGI": 60, "LUC": 64},
+        "buffs": {"attack": 0, "defense": 0},
+        "resistance": "neutral",
+        "guarding": false
+      },
+      "skill": {
+        "power": 100,
+        "element": "magic",
+        "is_crit": false
+      }
+    },
+    {
+      "name": "109 MAG + Multipliers (Root Cap)",
+      "attacker": {
+        "name": "Efficient Builder",
+        "level": 99,
+        "stats": {"STR": 40, "VIT": 80, "MAG": 109, "AGI": 40, "LUC": 70},
+        "buffs": {"attack": 2, "defense": 0},
+        "skill_potentials": {"magic": 5},
+        "charge_state": "concentrate",
+        "passive_abilities": []
+      },
+      "defender": {
+        "name": "Standard Enemy",
+        "level": 95,
+        "stats": {"STR": 40, "VIT": 80, "MAG": 40, "AGI": 60, "LUC": 64},
+        "buffs": {"attack": 0, "defense": 0},
+        "resistance": "neutral",
+        "guarding": false
+      },
+      "skill": {
+        "power": 100,
+        "element": "magic",
+        "is_crit": false
+      }
+    }
+  ]
+}

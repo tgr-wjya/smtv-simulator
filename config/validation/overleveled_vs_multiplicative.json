@@ -1,0 +1,57 @@
+{
+  "name": "Overleveled vs Multiplicative Stack",
+  "description": "Proves multiplicative synergy dominates level advantage",
+  "trials": 100,
+  "scenarios": [
+    {
+      "name": "Overleveled (Lv99 vs Lv85)",
+      "attacker": {
+        "name": "Overleveled Fighter",
+        "level": 99,
+        "stats": {"STR": 109, "VIT": 80, "MAG": 40, "AGI": 70, "LUC": 70},
+        "buffs": {"attack": 0, "defense": 0},
+        "skill_potentials": {},
+        "charge_state": null,
+        "passive_abilities": []
+      },
+      "defender": {
+        "name": "Standard Enemy",
+        "level": 85,
+        "stats": {"STR": 40, "VIT": 80, "MAG": 40, "AGI": 60, "LUC": 64},
+        "buffs": {"attack": 0, "defense": 0},
+        "resistance": "neutral",
+        "guarding": false
+      },
+      "skill": {
+        "power": 100,
+        "element": "phys",
+        "is_crit": false
+      }
+    },
+    {
+      "name": "Underleveled + Multipliers (Lv80 vs Lv85)",
+      "attacker": {
+        "name": "Multiplicative Fighter",
+        "level": 80,
+        "stats": {"STR": 109, "VIT": 80, "MAG": 40, "AGI": 70, "LUC": 110},
+        "buffs": {"attack": 0, "defense": 0},
+        "skill_potentials": {"phys": 9},
+        "charge_state": "impaler_glory",
+        "passive_abilities": ["critical_zealot"]
+      },
+      "defender": {
+        "name": "Standard Enemy",
+        "level": 85,
+        "stats": {"STR": 40, "VIT": 80, "MAG": 40, "AGI": 60, "LUC": 64},
+        "buffs": {"attack": 0, "defense": 0},
+        "resistance": "neutral",
+        "guarding": false
+      },
+      "skill": {
+        "power": 100,
+        "element": "phys",
+        "is_crit": true
+      }
+    }
+  ]
+}

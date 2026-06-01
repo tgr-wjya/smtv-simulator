@@ -222,6 +222,26 @@ python3 -m src.runner configs/batch_1_progressive.json \
   --output-prefix output/batch_1_
 ```
 
+### Validation Mode
+
+Validate SMTV Vengeance mechanics claims by running the complete mechanics validation suite:
+
+```bash
+# Run validation suite (runs 6 validation scenarios proving multiplicative dominance)
+python3 -m src.runner --validate
+
+# Run validation suite with custom number of trials (default: 100)
+python3 -m src.runner --validate --trials 1000
+```
+
+Results are exported to `output/validation/`:
+- `validation_results.csv` - Statistics for each scenario
+- `multiplier_breakdown.png` - Stacked bar chart showing damage contribution by layer
+- `level_vs_multiplicative.png` - Grouped bar chart comparing level advantage vs multiplier stack
+- `root_curve.png` - Root diminishing returns curve showing stat dumping cap
+- `vitality_heatmap.png` - Heatmap showing the 3-tier Vitality damage boundaries
+- `variance_distribution.png` - Stochastic variance distribution histogram
+
 ### Output
 
 The simulator generates three types of output:

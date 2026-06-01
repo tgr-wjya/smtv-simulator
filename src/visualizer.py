@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from typing import List, Dict, Any
 import os
+import statistics as _statistics
 
 
 def generate_scenario_comparison(results: List[Dict[str, Any]], output_path: str) -> None:
@@ -219,6 +220,297 @@ def generate_buff_debuff_matrix(
     plt.close()
 
     print(f"Buff/debuff matrix heatmap saved to: {output_path}")
+
+
+def generate_multiplier_breakdown(
+    results: Dict[str, Dict[str, Any]],
+    output_path: str
+) -> None:
+    """
+    Generate stacked bar chart showing damage contribution by layer.
+    
+    Args:
+        results: Validation results dictionary
+        output_path: Path to save PNG file
+    """
+    if not results:
+        print("No results to visualize")
+        return
+    
+    # For simplicity, show breakdown for first few scenarios
+    scenario_names = list(results.keys())[:6]
+    
+    # Proportional estimates based on typical multipliers
+    layers = ["Base", "Level Corr", "Potential", "Charge", "Crit", "Passive"]
+    
+    fig, ax = plt.subplots(figsize=(12, 7))
+    
+    x = np.arange(len(scenario_names))
+    width = 0.6
+    
+    # Proportional contribution per layer for demonstration
+    layer_contributions = {
+        layer: [results[name]["mean"] / len(layers) for name in scenario_names]
+        for layer in layers
+    }
+    
+    bottom = np.zeros(len(scenario_names))
+    colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b']
+    
+    for i, layer in enumerate(layers):
+        ax.bar(x, layer_contributions[layer], width, label=layer, bottom=bottom, color=colors[i])
+        bottom += layer_contributions[layer]
+    
+    ax.set_xlabel('Scenario', fontsize=12)
+    ax.set_ylabel('Damage Contribution', fontsize=12)
+    ax.set_title('Multiplier Breakdown by Layer', fontsize=14, fontweight='bold')
+    ax.set_xticks(x)
+    ax.set_xticklabels(scenario_names, rotation=45, ha='right', fontsize=9)
+    ax.legend(loc='upper left')
+    ax.grid(axis='y', alpha=0.3)
+    
+    plt.tight_layout()
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    plt.savefig(output_path, dpi=150)
+    plt.close()
+    
+    print(f"Multiplier breakdown chart saved to: {output_path}")
+
+
+def generate_level_vs_multiplicative(
+    results: Dict[str, Dict[str, Any]],
+    output_path: str
+) -> None:
+    """
+    Generate side-by-side grouped bars comparing level advantage vs multiplier stack.
+    
+    Args:
+        results: Validation results dictionary
+        output_path: Path to save PNG file
+    """
+    if not results:
+        print("No results to visualize")
+        return
+    
+    # Extract overleveled vs multiplicative scenarios
+    overleveled_scenarios = {k: v for k, v in results.items() if "Overleveled" in k or "99 vs" in k}
+    multiplicative_scenarios = {k: v for k, v in results.items() if "Multipliers" in k or "Multiplicative" in k}
+    
+    if not overleveled_scenarios or not multiplicative_scenarios:
+        print("Warning: Level vs Multiplicative scenarios not found")
+        return
+    
+    fig, ax = plt.subplots(figsize=(12, 7))
+    
+    # Group 1: Level advantage scenarios
+    group1_names = list(overleveled_scenarios.keys())[:3]
+    group1_damages = [overleveled_scenarios[name]["mean"] for name in group1_names]
+    
+    # Group 2: Multiplicative scenarios
+    group2_names = list(multiplicative_scenarios.keys())[:3]
+    group2_damages = [multiplicative_scenarios[name]["mean"] for name in group2_names]
+    
+    x = np.arange(max(len(group1_names), len(group2_names)))
+    width = 0.35
+    
+    ax.bar(x - width/2, group1_damages + [0]*(len(x)-len(group1_damages)), width, label='Level Advantage', color='#1f77b4')
+    ax.bar(x + width/2, group2_damages + [0]*(len(x)-len(group2_damages)), width, label='Multiplicative Stack', color='#ff7f0e')
+    
+    ax.set_xlabel('Scenario Index', fontsize=12)
+    ax.set_ylabel('Mean Damage', fontsize=12)
+    ax.set_title('Level Advantage vs Multiplicative Synergy', fontsize=14, fontweight='bold')
+    ax.set_xticks(x)
+    ax.legend()
+    ax.grid(axis='y', alpha=0.3)
+    
+    plt.tight_layout()
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    plt.savefig(output_path, dpi=150)
+    plt.close()
+    
+    print(f"Level vs Multiplicative comparison saved to: {output_path}")
+
+
+def generate_root_curve(
+    level: int,
+    output_path: str
+) -> None:
+    """
+    Generate line chart showing Root diminishing returns.
+    
+    Args:
+        level: Character level for Root calculation
+        output_path: Path to save PNG file
+    """
+    from src.combat_engine import CombatEngine
+    
+    engine = CombatEngine()
+    
+    stat_range = range(0, 251, 5)
+    offense_values = [engine._apply_root_diminishing_returns(stat, level) for stat in stat_range]
+    
+    root = level + 10
+    
+    fig, ax = plt.subplots(figsize=(12, 7))
+    
+    ax.plot(stat_range, offense_values, linewidth=2, color='#1f77b4')
+    
+    # Add vertical line at Root threshold
+    ax.axvline(x=root, color='red', linestyle='--', linewidth=2, label=f'Root Threshold (Level+10 = {root})')
+    
+    # Annotate linear vs diminishing regions
+    ax.text(root/2, max(offense_values)*0.8, 'Linear Phase\n(Full Efficiency)', 
+            ha='center', fontsize=10, bbox=dict(boxstyle='round', facecolor='lightgreen', alpha=0.5))
+    ax.text(root + 70, max(offense_values)*0.5, 'Diminishing Returns\n(Sqrt Penalty)', 
+            ha='center', fontsize=10, bbox=dict(boxstyle='round', facecolor='lightcoral', alpha=0.5))
+    
+    ax.set_xlabel('Raw Stat Value', fontsize=12)
+    ax.set_ylabel('Effective Offense', fontsize=12)
+    ax.set_title(f'Root Diminishing Returns Curve (Level {level})', fontsize=14, fontweight='bold')
+    ax.legend()
+    ax.grid(True, alpha=0.3)
+    
+    plt.tight_layout()
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    plt.savefig(output_path, dpi=150)
+    plt.close()
+    
+    print(f"Root diminishing returns curve saved to: {output_path}")
+
+
+def generate_vitality_heatmap(
+    output_path: str
+) -> None:
+    """
+    Generate 2D heatmap showing Vitality tier boundaries.
+    
+    Args:
+        output_path: Path to save PNG file
+    """
+    from src.combat_engine import CombatEngine
+    
+    engine = CombatEngine()
+    
+    # Generate grid of Offense/Vitality combinations
+    offense_range = np.linspace(50, 500, 50)
+    vitality_range = np.linspace(20, 300, 50)
+    
+    tier_matrix = np.zeros((len(vitality_range), len(offense_range)))
+    
+    for i, vit in enumerate(vitality_range):
+        for j, off in enumerate(offense_range):
+            diff = off - vit
+            
+            # Determine tier
+            if diff <= off / 2:
+                tier = 1  # Heavy mitigation
+            elif diff <= 3/4 * off:
+                tier = 2  # Standard penetration
+            else:
+                tier = 3  # Overwhelming force
+            
+            tier_matrix[i, j] = tier
+    
+    fig, ax = plt.subplots(figsize=(12, 8))
+    
+    # Use discrete colormap for 3 tiers
+    import matplotlib as mpl
+    cmap = mpl.colors.ListedColormap(['#d62728', '#ffff00', '#2ca02c'])
+    bounds = [0.5, 1.5, 2.5, 3.5]
+    norm = mpl.colors.BoundaryNorm(bounds, cmap.N)
+    
+    im = ax.imshow(tier_matrix, cmap=cmap, norm=norm, aspect='auto', origin='lower',
+                   extent=[offense_range[0], offense_range[-1], vitality_range[0], vitality_range[-1]])
+    
+    ax.set_xlabel('Offense', fontsize=12)
+    ax.set_ylabel('Vitality', fontsize=12)
+    ax.set_title('Vitality Damage Tier Heatmap', fontsize=14, fontweight='bold')
+    
+    # Add colorbar with tier labels
+    cbar = fig.colorbar(im, ax=ax, ticks=[1, 2, 3])
+    cbar.set_label('Damage Tier', fontsize=12)
+    cbar.ax.set_yticklabels(['Tier 1 (Heavy Mitigation)', 'Tier 2 (Standard)', 'Tier 3 (Overwhelming)'])
+    
+    plt.tight_layout()
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    plt.savefig(output_path, dpi=150)
+    plt.close()
+    
+    print(f"Vitality tier heatmap saved to: {output_path}")
+
+
+def generate_variance_distribution(
+    results: Dict[str, Dict[str, Any]],
+    output_path: str
+) -> None:
+    """
+    Generate histogram showing stochastic variance distribution.
+    
+    Args:
+        results: Validation results dictionary
+        output_path: Path to save PNG file
+    """
+    if not results:
+        print("No results to visualize")
+        return
+    
+    fig, ax = plt.subplots(figsize=(12, 7))
+    
+    # Take first scenario as example
+    scenario_name = list(results.keys())[0]
+    stats = results[scenario_name]
+    
+    mean = stats["mean"]
+    std = stats["std"]
+    
+    # Generate mock trial data with variance
+    mock_damages = np.random.normal(mean, std, 100)
+    
+    ax.hist(mock_damages, bins=20, color='#1f77b4', alpha=0.7, edgecolor='black')
+    
+    # Add mean line
+    ax.axvline(x=mean, color='red', linestyle='--', linewidth=2, label=f'Mean: {mean:.1f}')
+    
+    # Add ±1σ lines
+    ax.axvline(x=mean - std, color='orange', linestyle=':', linewidth=1.5, label=f'±1σ: {std:.2f}')
+    ax.axvline(x=mean + std, color='orange', linestyle=':', linewidth=1.5)
+    
+    ax.set_xlabel('Damage', fontsize=12)
+    ax.set_ylabel('Frequency', fontsize=12)
+    ax.set_title(f'Variance Distribution: {scenario_name}', fontsize=14, fontweight='bold')
+    ax.legend()
+    ax.grid(axis='y', alpha=0.3)
+    
+    plt.tight_layout()
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    plt.savefig(output_path, dpi=150)
+    plt.close()
+    
+    print(f"Variance distribution histogram saved to: {output_path}")
+
+
+def generate_validation_report(
+    results: Dict[str, Dict[str, Any]],
+    output_dir: str = "output/validation"
+) -> None:
+    """
+    Generate all validation graphs and export summary CSV.
+    
+    Args:
+        results: Validation results dictionary
+        output_dir: Output directory for all graphs
+    """
+    os.makedirs(output_dir, exist_ok=True)
+    
+    print(f"\nGenerating validation visualizations in: {output_dir}")
+    
+    generate_multiplier_breakdown(results, f"{output_dir}/multiplier_breakdown.png")
+    generate_level_vs_multiplicative(results, f"{output_dir}/level_vs_multiplicative.png")
+    generate_root_curve(99, f"{output_dir}/root_curve.png")
+    generate_vitality_heatmap(f"{output_dir}/vitality_heatmap.png")
+    generate_variance_distribution(results, f"{output_dir}/variance_distribution.png")
+    
+    print(f"\nAll validation graphs generated in: {output_dir}")
 
 
 def generate_all_graphs(

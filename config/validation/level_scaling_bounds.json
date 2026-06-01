@@ -1,0 +1,82 @@
+{
+  "name": "Level Scaling Bounds",
+  "description": "Proves 0.5x floor and 1.5x ceiling on Level Correction",
+  "trials": 100,
+  "scenarios": [
+    {
+      "name": "Level 50 vs 99 (Floor Test)",
+      "attacker": {
+        "name": "Underleveled",
+        "level": 50,
+        "stats": {"STR": 109, "VIT": 80, "MAG": 40, "AGI": 70, "LUC": 70},
+        "buffs": {"attack": 0, "defense": 0},
+        "skill_potentials": {},
+        "charge_state": null,
+        "passive_abilities": []
+      },
+      "defender": {
+        "name": "High Level Enemy",
+        "level": 99,
+        "stats": {"STR": 40, "VIT": 80, "MAG": 40, "AGI": 60, "LUC": 64},
+        "buffs": {"attack": 0, "defense": 0},
+        "resistance": "neutral",
+        "guarding": false
+      },
+      "skill": {
+        "power": 100,
+        "element": "phys",
+        "is_crit": false
+      }
+    },
+    {
+      "name": "Level 97 vs 99 (Near-Peer)",
+      "attacker": {
+        "name": "Near Peer",
+        "level": 97,
+        "stats": {"STR": 109, "VIT": 80, "MAG": 40, "AGI": 70, "LUC": 70},
+        "buffs": {"attack": 0, "defense": 0},
+        "skill_potentials": {},
+        "charge_state": null,
+        "passive_abilities": []
+      },
+      "defender": {
+        "name": "Standard Enemy",
+        "level": 99,
+        "stats": {"STR": 40, "VIT": 80, "MAG": 40, "AGI": 60, "LUC": 64},
+        "buffs": {"attack": 0, "defense": 0},
+        "resistance": "neutral",
+        "guarding": false
+      },
+      "skill": {
+        "power": 100,
+        "element": "phys",
+        "is_crit": false
+      }
+    },
+    {
+      "name": "Level 99 vs 50 (Ceiling Test)",
+      "attacker": {
+        "name": "Overleveled",
+        "level": 99,
+        "stats": {"STR": 109, "VIT": 80, "MAG": 40, "AGI": 70, "LUC": 70},
+        "buffs": {"attack": 0, "defense": 0},
+        "skill_potentials": {},
+        "charge_state": null,
+        "passive_abilities": []
+      },
+      "defender": {
+        "name": "Low Level Enemy",
+        "level": 50,
+        "stats": {"STR": 40, "VIT": 80, "MAG": 40, "AGI": 60, "LUC": 64},
+        "buffs": {"attack": 0, "defense": 0},
+        "resistance": "neutral",
+        "guarding": false
+      },
+      "skill": {
+        "power": 100,
+        "element": "phys",
+        "is_crit": false
+      }
+    }
+  ]
+}

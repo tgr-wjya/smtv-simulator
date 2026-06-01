@@ -1,0 +1,57 @@
+{
+  "name": "Single Buff vs Multiplicative Stack",
+  "description": "Proves multiplicative stacking >> single buff",
+  "trials": 100,
+  "scenarios": [
+    {
+      "name": "Tarukaja Only",
+      "attacker": {
+        "name": "Single Buff Fighter",
+        "level": 99,
+        "stats": {"STR": 109, "VIT": 80, "MAG": 40, "AGI": 70, "LUC": 70},
+        "buffs": {"attack": 1, "defense": 0},
+        "skill_potentials": {},
+        "charge_state": null,
+        "passive_abilities": []
+      },
+      "defender": {
+        "name": "Standard Enemy",
+        "level": 95,
+        "stats": {"STR": 40, "VIT": 80, "MAG": 40, "AGI": 60, "LUC": 64},
+        "buffs": {"attack": 0, "defense": 0},
+        "resistance": "neutral",
+        "guarding": false
+      },
+      "skill": {
+        "power": 100,
+        "element": "phys",
+        "is_crit": false
+      }
+    },
+    {
+      "name": "Tarukaja + Charge + Potential",
+      "attacker": {
+        "name": "Stacked Fighter",
+        "level": 99,
+        "stats": {"STR": 109, "VIT": 80, "MAG": 40, "AGI": 70, "LUC": 70},
+        "buffs": {"attack": 1, "defense": 0},
+        "skill_potentials": {"phys": 5},
+        "charge_state": "charge",
+        "passive_abilities": []
+      },
+      "defender": {
+        "name": "Standard Enemy",
+        "level": 95,
+        "stats": {"STR": 40, "VIT": 80, "MAG": 40, "AGI": 60, "LUC": 64},
+        "buffs": {"attack": 0, "defense": 0},
+        "resistance": "neutral",
+        "guarding": false
+      },
+      "skill": {
+        "power": 100,
+        "element": "phys",
+        "is_crit": false
+      }
+    }
+  ]
+}
