@@ -242,6 +242,19 @@ Results are exported to `output/validation/`:
 - `vitality_heatmap.png` - Heatmap showing the 3-tier Vitality damage boundaries
 - `variance_distribution.png` - Stochastic variance distribution histogram
 
+### Interactive GUI Mode
+
+Launch the Shin Megami Tensei V: Vengeance interactive desktop dashboard to design your own Nahobino and calculate damage live:
+
+```bash
+python3 -m src.runner --gui
+```
+
+**Features:**
+- **Nahobino Designer (Left Panel)**: Dynamically adjust level, stats (STR, MAG, LUC), potential modifiers, charge states (None, Charge, Concentrate, Impaler's Glory), and passives (Critical Zealot, Murderous Glee).
+- **Target & Buff Designer (Middle Panel)**: Change defender stats, level, elemental resistance, guarding/doubler-bug toggles, and buff levels (-3 to +3).
+- **Damage Dashboard & Live Plotting (Right Panel)**: View live damage outputs (Normal, Crit, Expected) and trace how STR buffs scale dynamically via the live matplotlib line graph.
+
 ### Output
 
 The simulator generates three types of output:
